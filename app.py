@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 import glob
 import os
+import pickle
 
 st.set_page_config(page_title="DSLD Barcode Lookup", layout="wide")
 
@@ -14,41 +15,54 @@ st.set_page_config(page_title="DSLD Barcode Lookup", layout="wide")
 # -------------------------------------------------
 @st.cache_data
 def load_data():
-    files = glob.glob("data/*.csv")
-    tables = {}
 
-    po = []
-    ci = []
-    dsf = []
-    ls = []
-    oi = []
+    if len(glob.glob("data/*.pkl")) > 0:
 
-    for f in files:
-        fname = os.path.basename(f)
+        with open("data/tables.pkl", 'rb') as f:
+            tables = pickle.load(f)
 
-        # Skip readme and malformed LabelStatements files
-        if fname.lower().startswith("readme") or fname.startswith("LabelStatements_"):
-            continue
+    else:
+        st.info('Reading data from files')
+        files = glob.glob("data/*.csv")
+        tables = {}
 
-        df = pd.read_csv(f, dtype=str)
+        po = []
+        ci = []
+        dsf = []
+        ls = []
+        oi = []
 
-        if fname.startswith("ProductOverview_"):
-            po.append(df)
+        for f in files:
+            fname = os.path.basename(f)
 
-        elif fname.startswith("CompanyInformation_"):
-            ci.append(df)
+            # Skip readme and malformed LabelStatements files
+            if fname.lower().startswith("readme") or fname.startswith("LabelStatements_"):
+                continue
 
-        elif fname.startswith("DietarySupplementFacts_"):
-            dsf.append(df)
+            df = pd.read_csv(f, dtype=str)
 
-        elif fname.startswith("OtherIngredients_"):
-            oi.append(df)
+            if fname.startswith("ProductOverview_"):
+                po.append(df)
 
-    tables["productOverview"] = pd.concat(po, ignore_index=True)
-    tables["companyInformation"] = pd.concat(ci, ignore_index=True)
-    tables["dietarySupplementFacts"] = pd.concat(dsf, ignore_index=True)
-    tables["labelStatements"] = pd.DataFrame()  # empty placeholder
-    tables["otherIngredients"] = pd.concat(oi, ignore_index=True)
+            elif fname.startswith("CompanyInformation_"):
+                ci.append(df)
+
+            elif fname.startswith("DietarySupplementFacts_"):
+                dsf.append(df)
+
+            elif fname.startswith("OtherIngredients_"):
+                oi.append(df)
+
+        tables["productOverview"] = pd.concat(po, ignore_index=True)
+        tables["companyInformation"] = pd.concat(ci, ignore_index=True)
+        tables["dietarySupplementFacts"] = pd.concat(dsf, ignore_index=True)
+        tables["labelStatements"] = pd.DataFrame()  # empty placeholder
+        tables["otherIngredients"] = pd.concat(oi, ignore_index=True)
+
+        st.info('saving data to pickle file')
+
+        with open("data/tables.pkl", 'wb') as f:
+            pickle.dump(tables, f)
 
     return tables
 
@@ -79,11 +93,14 @@ def fetch_label_image(product_id):
 
 tables = load_data()
 product_df = tables["productOverview"]
-
+st.info('Loaded DSLD Database')
 # -------------------------------------------------
 # UI
 # -------------------------------------------------
 st.title("🔍 Dietary Supplement Barcode Lookup")
+
+st.write('This app allows you to search for dietary supplements by their UPC Barcodes in the NIH Dietary Supplement Label Database')
+st.write('https://ods.od.nih.gov/Research/Dietary_Supplement_Label_Database.aspx')
 
 barcode = st.text_input("Enter a barcode (UPC):", "")
 
