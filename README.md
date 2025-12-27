@@ -10,7 +10,7 @@ The app allows users to enter a barcode (UPC) and instantly view all available i
 This project is designed for offline use and works entirely from the CSV files downloaded from the DSLD API Guide.
 
 ## 📁 Data Requirements
-Place all DSLD CSV files inside a folder named:
+Download and place all DSLD CSV files inside a folder named:
 data/
 
 
