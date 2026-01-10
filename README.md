@@ -1,148 +1,95 @@
-# DSLD Barcode Lookup App
+## 🧬 Dietary Supplement Explorer
 
-A streamlined Streamlit application for exploring the **NIH Dietary Supplement Label Database (DSLD)** using locally 
-downloaded CSV files.
+A multi‑page Streamlit application for exploring dietary supplement products, ingredients, mechanisms, and NIH ODS 
+metadata.
 
-The app provides a clean, consolidated view of supplement information based on a **barcode (UPC)** lookup, with 
-intelligent related‑product suggestions and a polished product overview experience.
+This project brings together two complementary tools:
+- **DSLD Product Explorer** — search, filter, and inspect dietary supplement products from the *NIH Dietary Supplement 
+Label Database (DSLD)*
+- **Ingredient Metadata Explorer** — explore mechanisms, categories, and compounds using curated metadata from the *NIH 
+Office of Dietary Supplements (ODS)*
 
-This project is designed for offline use and works entirely from the CSV files downloaded from the DSLD API Guide.
-
----
-
-## 📁 Data Requirements
-DSLD data can be downloaded from here: https://dsld.od.nih.gov/api-guide
-
-Download and place all DSLD CSV files inside a folder named:
-data/
-
-The app currently supports the following file groups:
-
-| Data Type | Expected Files | Status |
-|----------|----------------|--------|
-| Product Overview | `ProductOverview_*.csv` | **Loaded & merged** |
-| Company Information | `CompanyInformation_*.csv` | **Loaded & merged** |
-| Supplement Facts | `DietarySupplementFacts_*.csv` | **Loaded & merged** |
-| Other Ingredients | `OtherIngredients_*.csv` | **Loaded & merged** |
-| Label Statements | `LabelStatements_*.csv` | **Ignored (malformed)** |
-| ReadMe files | `ReadMe*.csv` | **Ignored** |
-
-All tables are merged by **DSLD ID**, which serves as the primary key across the dataset.
+The app is designed with clarity in mind to help understand how a consumer might explore this kind of data as they look
+for information about dietary supplements.
 
 ---
 
-## 🔍 Current Features
+## 🚀 Features
 
-### Barcode Lookup
-Enter a barcode (UPC) to retrieve the matching product from the Product Overview table.
+### Home Page
+- Overview of each page
+- Links to primary data sources:
+- NIH Dietary Supplement Label Database (DSLD)
+- NIH Office of Dietary Supplements (ODS)
+- Clean, user‑friendly landing page
 
-- Exact match on the `"Bar Code"` column  
-- Displays product name and DSLD ID  
-- Automatically loads all related data across tables  
-- Supports deep‑linking via `?dsld_id=` query parameter  
+### DSLD Product Explorer
+- Search products by name
+- Filter by brand and supplement form
+- Barcode lookup
+- Deep‑linking support (?product_id=...)
+- Product overview including:
+- Product name
+- Brand
+- Ingredients
+- Other ingredients
+- Market status
+- Barcode
+- Label PDF viewer (via NIH ODS PDF endpoint)
+- Related product recommendations
+- Cached data loading for fast performance
 
----
+### Ingredient Metadata Explorer
+- Filter ingredients by Health Goal (multi‑select)
+- Refine results by Category and Mechanism
+- Interactive Mechanism → Compound network graph using ECharts
+- Category‑colored nodes for intuitive visual grouping
+- Hover tooltips with mechanism descriptions
+- Detailed compound information:
+- Overview
+- Safety
+- Interactions
+- RDA / UL tables
+- ODS fact sheet links
+- Expanders for clean, uncluttered navigation
 
-### 🧩 Product Overview (Fully Consolidated)
 
-The Product Overview tab now presents a **clean, human‑friendly summary** that merges information from multiple DSLD 
-tables:
-
-### **Included Fields**
-- URL  
-- DSLD ID  
-- Product Name  
-- Brand Name
-- Product Type
-- Supplement Form
-- Contents  
-- Serving Size  
-- Suggested Use  
-- Primary Ingredient(s)  
-- Market Status (highlighted)  
-- **Ingredients** (from Factsheet)  
-- **Ingredient Categories** (from Factsheet)  
-- **Daily Value Target Group** (from Factsheet)  
-- **Other Ingredients** (from OtherIngredients)
-
-### **Product Label Image**
-A toggleable container (collapsed by default) displays the product label image rendered from the official DSLD PDF:
-https://dsld.od.nih.gov/dsld/pdf/{DSLD_ID}.pdf
-
-Rendering is handled via **PyMuPDF**, avoiding Poppler dependencies.
-
----
-
-### 🏷️ Brand Information (Refined)
-
-The Brand Information tab now shows only the fields that matter:
-
-### **Company Name**
-
-### **Company Roles** (read‑only checkboxes)
-- Manufacturer  
-- Distributor  
-- Packager  
-- Reseller  
-- Other  
-
-### **Related Products by This Company**
-A curated list of **up to 5** related products, ranked by name similarity:
-
-- Prefers products with similar names  
-- Falls back to category‑adjacent items (e.g., other vitamins)  
-- Only includes products from the same company  
-- Optional filter: **Show only products currently on market**  
-- Each product includes:
-  - Product name  
-  - DSLD ID  
-  - Link to official DSLD page  
-  - **“View in App”** button (reloads the app with that product preselected)
-
-This transforms the Brand tab into a meaningful exploration tool rather than a raw data dump.
-
----
-
-## 🛠️ Tech Stack
-
-- Python  
-- Streamlit  
-- Pandas  
-- PyMuPDF (fitz) for PDF → image conversion  
-- Glob / OS for file discovery  
-
----
-
-## ▶️ Running the App
-
-Install dependencies:
-
-```bash
-pip install streamlit pandas pymupdf pillow
+## 📁 Project Structure
 ```
-
-- Run the app:
-```
-streamlit run app.py
-```
-
-- Project Structure
-
-```
-project/
+dietary_supplement_database_app/
 │
-├── app.py
-└── data/
-    ├── ProductOverview_01.csv
-    ├── ProductOverview_02.csv
-    ├── CompanyInformation_01.csv
-    ├── DietarySupplementFacts_01.csv
-    ├── OtherIngredients_01.csv
-    └── ...
+├── Home.py
+├── pages/
+│   ├── 1_Dietary_Supplement_Label_Explorer.py
+│   └── 2_Ingredient_Metadata_Explorer.py
+│
+├── utils/
+│   ├── dsld_helpers.py
+│   ├── ingredient_helpers.py
+│
+├── data/
+│   └── dsld_tables.pkl   (tracked via Git LFS)
+│
+├── requirements.txt
+└── README.md
 ```
 
-## 📌 Known Limitations
-- LabelStatements CSVs are malformed and currently skipped
-- No name‑based search (disabled due to poor DSLD naming quality)
-- Some products may not have a corresponding PDF
-- Ingredient categories are only as good as DSLD’s metadata
+---
+
+## 📚 Data Sources
+This app integrates authoritative data from:
+- NIH Dietary Supplement Label Database (DSLD)
+https://dsld.od.nih.gov
+- NIH Office of Dietary Supplements (ODS)
+https://ods.od.nih.gov 
+
+These sources provide product labels, ingredient metadata, safety summaries, RDA/UL values, and more.
+
+## 🛠 Tech Stack
+- Python 3.10+
+- Streamlit (multi‑page app framework)
+- Pandas (data processing)
+- PyMuPDF (PDF → image extraction)
+- ECharts via streamlit‑echarts (interactive network graph)
+- PyVis (legacy graph support, optional)
+- Git LFS (large dataset storage)
