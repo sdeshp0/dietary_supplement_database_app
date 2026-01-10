@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 from streamlit.components.v1 import html
+from streamlit_echarts import st_echarts
+
 
 from utils.ingredient_helpers import (
     load_ontology,
@@ -13,6 +15,8 @@ from utils.ingredient_helpers import (
     CATEGORY_COLORS,
     extract_all_health_goals,
     mechanisms_for_goal,
+    build_echarts_graph
+
 )
 
 # ---------------------------------------------------------
@@ -45,20 +49,18 @@ ontology = ontology.merge(mech_meta, on="mechanism", how="left")
 # ---------------------------------------------------------
 st.markdown("## 🎯 Filter by Health Goal")
 
-all_goals = ["All"] + extract_all_health_goals(ontology)
-
-selected_goal = st.selectbox(
-    "Select a health goal to explore:",
-    all_goals,
-    index=0,
+selected_goals = st.multiselect(
+    "Select one or more health goals:",
+    extract_all_health_goals(ontology),
+    default=[],
 )
 
-# Apply health‑goal filter
-if selected_goal == "All":
+if not selected_goals:
     goal_filtered = ontology.copy()
 else:
-    goal_mechs = mechanisms_for_goal(ontology, selected_goal)
-    goal_filtered = ontology[ontology["mechanism"].isin(goal_mechs)]
+    mech_sets = [mechanisms_for_goal(ontology, g) for g in selected_goals]
+    combined_mechs = set().union(*mech_sets)
+    goal_filtered = ontology[ontology["mechanism"].isin(combined_mechs)]
 
 # ---------------------------------------------------------
 # SECONDARY FILTERS: CATEGORY + MECHANISM
@@ -102,6 +104,8 @@ with st.expander("View Filtered Results"):
     table = merged[["mechanism", "category", "compound"]].drop_duplicates()
     st.dataframe(table, use_container_width=True, hide_index=True)
 
+# PyVis Graph
+_='''
 with st.expander("Mechanism → Compound Graph"):
     st.subheader("Mechanism → Compound Graph")
 
@@ -128,6 +132,61 @@ with st.expander("Mechanism → Compound Graph"):
     out = Path("ingredient_graph.html")
     net.write_html(str(out))
     html(out.read_text(), height=650)
+
+'''
+
+# ECharts Graph
+with st.expander("Mechanism → Compound Graph"):
+    st.subheader("Mechanism → Compound Graph")
+    # Legend
+    st.markdown("### Legend")
+    legend_cols = st.columns(4)
+    for i, (cat, color) in enumerate(CATEGORY_COLORS.items()):
+        with legend_cols[i % 4]:
+            st.markdown(
+                f"""
+                    <div style="display:flex;align-items:center;margin-bottom:6px;">
+                        <div style="width:16px;height:16px;background:{color};
+                                    border-radius:3px;margin-right:8px;"></div>
+                        <span>{cat}</span>
+                    </div>
+                    """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("---")
+
+    # Build ECharts graph data
+    nodes, links = build_echarts_graph(filtered, CATEGORY_COLORS)
+
+    if not nodes or not links:
+        st.warning("No graph data available for the selected filters.")
+    else:
+        options = {
+            "tooltip": {
+            "show": True,
+            "formatter": "{b}<br/>{c}"
+            },
+            "series": [
+                {
+                    "type": "graph",
+                    "layout": "force",
+                    "roam": True,
+                    "draggable": True,
+                    "focusNodeAdjacency": True,
+                    "force": {"repulsion": 200, "edgeLength": 120},
+                    "label": {"show": True, "position": "right"},
+                    "data": nodes,
+                    "links": links,
+                    "categories": [
+                        {"name": "Mechanisms"},
+                        {"name": "Compounds"},
+                    ],
+                }
+            ],
+        }
+
+        st_echarts(options=options, height="650px")
 
 # ---------------------------------------------------------
 # Show Compound Details

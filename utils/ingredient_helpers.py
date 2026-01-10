@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 from pyvis.network import Network
+from streamlit_echarts import st_echarts
 
 
 # ---------------------------------------------------------
@@ -178,3 +179,56 @@ def compounds_for_mechanisms(ontology_df, mechanisms):
     return sorted(
         ontology_df[ontology_df["mechanism"].isin(mechanisms)]["compound"].unique()
     )
+
+
+# ---------------------------------------------------------
+# ECHARTS GRAPH BUILDER
+# ---------------------------------------------------------
+def build_echarts_graph(df, category_colors):
+    """
+    Build node and link structures for an ECharts force-directed graph.
+    Includes mechanism descriptions for hover tooltips.
+    """
+    nodes = []
+    links = []
+
+    # Mechanism nodes
+    for mech in df["mechanism"].dropna().unique():
+        mech = str(mech)
+        desc = df.loc[df["mechanism"] == mech, "description"].dropna().unique()
+        desc = desc[0] if len(desc) else "No description available."
+
+        nodes.append({
+            "name": mech,
+            "category": 0,
+            "symbolSize": 40,
+            "itemStyle": {"color": "#4C72B0"},
+            "value": desc,   # <-- tooltip content
+        })
+
+    # Compound nodes
+    for comp in df["compound"].dropna().unique():
+        comp = str(comp)
+        cat = df.loc[df["compound"] == comp, "category"].iloc[0]
+        color = category_colors.get(cat, "#DD8452")
+
+        nodes.append({
+            "name": comp,
+            "category": 1,
+            "symbolSize": 25,
+            "itemStyle": {"color": color},
+            #"value": f"Compound: {comp}",  # simple tooltip
+        })
+
+    # Edges
+    for _, row in df.iterrows():
+        mech = row.get("mechanism")
+        comp = row.get("compound")
+        if pd.notna(mech) and pd.notna(comp):
+            links.append({
+                "source": str(mech),
+                "target": str(comp),
+            })
+
+    return nodes, links
+
