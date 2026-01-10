@@ -5,3 +5,5 @@ pyvis==0.3.2
 pymupdf
 requests
 python-dateutil
+streamlit-echarts==0.4.0
+
