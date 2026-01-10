@@ -28,6 +28,7 @@ st.write(
     "Explore mechanisms, categories, health goals, and NIH ODS metadata for "
     "common dietary supplement ingredients."
 )
+st.caption("*Note that detailed information is currently only available for Vitamins and Minerals")
 
 # ---------------------------------------------------------
 # LOAD DATA
@@ -38,7 +39,6 @@ mech_meta = load_mechanism_metadata()
 
 # Merge mechanism metadata into ontology
 ontology = ontology.merge(mech_meta, on="mechanism", how="left")
-
 
 # ---------------------------------------------------------
 # TOP‑LEVEL FILTER: HEALTH GOAL
@@ -97,16 +97,12 @@ if filtered.empty:
 # Merge with metadata
 merged = filtered.merge(metadata, on=["compound", "category"], how="left")
 
-# ---------------------------------------------------------
-# LAYOUT
-# ---------------------------------------------------------
-st.markdown("---")
-left, right = st.columns([2, 1])
+# Table
+with st.expander("View Filtered Results"):
+    table = merged[["mechanism", "category", "compound"]].drop_duplicates()
+    st.dataframe(table, use_container_width=True, hide_index=True)
 
-# ---------------------------------------------------------
-# LEFT SIDE — GRAPH + TABLE
-# ---------------------------------------------------------
-with left:
+with st.expander("Mechanism → Compound Graph"):
     st.subheader("Mechanism → Compound Graph")
 
     # Legend
@@ -133,101 +129,95 @@ with left:
     net.write_html(str(out))
     html(out.read_text(), height=650)
 
-    # Table
-    st.markdown("---")
-    st.subheader("Details Table")
-    table = merged[["mechanism", "category", "compound"]].drop_duplicates()
-    st.dataframe(table, use_container_width=True)
+# ---------------------------------------------------------
+# Show Compound Details
+# ---------------------------------------------------------
+
+st.subheader("Compound Details")
+
+compounds = sorted(merged["compound"].unique())
+selected = st.selectbox("Select a compound", compounds)
+
+row = merged[merged["compound"] == selected].iloc[0]
+
+tab_overview, tab_safety, tab_interactions, tab_rda = st.tabs(
+    ["Overview", "Safety", "Interactions", "RDA / UL"]
+)
 
 # ---------------------------------------------------------
-# RIGHT SIDE — DETAIL PANEL
+# OVERVIEW TAB
 # ---------------------------------------------------------
-with right:
-    st.subheader("Compound Details")
+with tab_overview:
+    st.markdown(f"### {selected}")
+    st.markdown(f"**Category:** {row['category']}")
 
-    compounds = sorted(merged["compound"].unique())
-    selected = st.selectbox("Select a compound", compounds)
+    # Mechanisms & descriptions
+    compound_mechs = merged[merged["compound"] == selected][
+        ["mechanism", "description", "group", "health_goals"]
+    ].drop_duplicates()
 
-    row = merged[merged["compound"] == selected].iloc[0]
+    if not compound_mechs.empty:
+        st.markdown("### Mechanisms & Functionality")
+        for _, mech_row in compound_mechs.iterrows():
+            mech = mech_row["mechanism"]
+            desc = safe_str(mech_row["description"])
+            group = safe_str(mech_row["group"])
+            goals = safe_str(mech_row["health_goals"])
 
-    tab_overview, tab_safety, tab_interactions, tab_rda = st.tabs(
-        ["Overview", "Safety", "Interactions", "RDA / UL"]
-    )
+            st.markdown(f"- **{mech}** — {desc}")
+            if group:
+                st.caption(f"Group: {group}")
+            if goals:
+                st.caption(f"Health goals: {goals}")
 
-    # ---------------------------------------------------------
-    # OVERVIEW TAB
-    # ---------------------------------------------------------
-    with tab_overview:
-        st.markdown(f"### {selected}")
-        st.markdown(f"**Category:** {row['category']}")
+    # ODS metadata
+    pf = safe_str(row.get("primary_functions"))
+    if pf:
+        st.markdown(f"**Primary functions:** {pf}")
 
-        # Mechanisms & descriptions
-        compound_mechs = merged[merged["compound"] == selected][
-            ["mechanism", "description", "group", "health_goals"]
-        ].drop_duplicates()
+    fs = safe_str(row.get("food_sources"))
+    if fs:
+        st.markdown(f"**Food sources:** {fs}")
 
-        if not compound_mechs.empty:
-            st.markdown("### Mechanisms & Functionality")
-            for _, mech_row in compound_mechs.iterrows():
-                mech = mech_row["mechanism"]
-                desc = safe_str(mech_row["description"])
-                group = safe_str(mech_row["group"])
-                goals = safe_str(mech_row["health_goals"])
+    tsr = safe_str(row.get("typical_supplement_range"))
+    if tsr:
+        st.markdown(f"**Typical supplement-related values:** {tsr}")
 
-                st.markdown(f"- **{mech}** — {desc}")
-                if group:
-                    st.caption(f"Group: {group}")
-                if goals:
-                    st.caption(f"Health goals: {goals}")
+    url = safe_str(row.get("ods_url"))
+    if url.startswith("http"):
+        st.markdown(f"[ODS Fact Sheet]({url})")
 
-        # ODS metadata
-        pf = safe_str(row.get("primary_functions"))
-        if pf:
-            st.markdown(f"**Primary functions:** {pf}")
+# ---------------------------------------------------------
+# SAFETY TAB
+# ---------------------------------------------------------
+with tab_safety:
+    safety = safe_str(row.get("safety_overview"))
+    st.markdown(safety or "No safety data available.")
 
-        fs = safe_str(row.get("food_sources"))
-        if fs:
-            st.markdown(f"**Food sources:** {fs}")
+# ---------------------------------------------------------
+# INTERACTIONS TAB
+# ---------------------------------------------------------
+with tab_interactions:
+    inter = safe_str(row.get("interactions_summary"))
+    st.markdown(inter or "No interaction data available.")
 
-        tsr = safe_str(row.get("typical_supplement_range"))
-        if tsr:
-            st.markdown(f"**Typical supplement-related values:** {tsr}")
+# ---------------------------------------------------------
+# RDA / UL TAB
+# ---------------------------------------------------------
+with tab_rda:
+    rda = safe_json(row.get("rda_json"))
+    ul = safe_json(row.get("ul_json"))
 
-        url = safe_str(row.get("ods_url"))
-        if url.startswith("http"):
-            st.markdown(f"[ODS Fact Sheet]({url})")
+    if rda:
+        st.markdown("#### RDA / AI")
+        st.table(pd.DataFrame(rda))
+    else:
+        st.info("No RDA / AI data.")
 
-    # ---------------------------------------------------------
-    # SAFETY TAB
-    # ---------------------------------------------------------
-    with tab_safety:
-        safety = safe_str(row.get("safety_overview"))
-        st.markdown(safety or "No safety data available.")
+    if ul:
+        st.markdown("#### UL")
+        st.table(pd.DataFrame(ul))
+    else:
+        st.info("No UL data.")
 
-    # ---------------------------------------------------------
-    # INTERACTIONS TAB
-    # ---------------------------------------------------------
-    with tab_interactions:
-        inter = safe_str(row.get("interactions_summary"))
-        st.markdown(inter or "No interaction data available.")
-
-    # ---------------------------------------------------------
-    # RDA / UL TAB
-    # ---------------------------------------------------------
-    with tab_rda:
-        rda = safe_json(row.get("rda_json"))
-        ul = safe_json(row.get("ul_json"))
-
-        if rda:
-            st.markdown("#### RDA / AI")
-            st.table(pd.DataFrame(rda))
-        else:
-            st.info("No RDA / AI data.")
-
-        if ul:
-            st.markdown("#### UL")
-            st.table(pd.DataFrame(ul))
-        else:
-            st.info("No UL data.")
-
-        st.caption("Values from NIH ODS fact sheets.")
+    st.caption("Values from NIH ODS fact sheets.")
