@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+pyvis
+pymupdf
+requests
+python-dateutil
