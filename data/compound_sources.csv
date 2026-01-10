@@ -1,0 +1,98 @@
+compound,category,source_type,source_url
+5-HTP,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/794.html
+Alpha-lipoic acid,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/967.html
+Amylase,Enzyme,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1002.html
+Ashwagandha,Herb,NCCIH,https://www.nccih.nih.gov/health/ashwagandha
+B1,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Thiamin-Consumer
+B12,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminB12-Consumer
+B2,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Riboflavin-Consumer
+B3,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Niacin-Consumer
+B5,Vitamin,ODS,https://ods.od.nih.gov/factsheets/PantothenicAcid-Consumer
+B6,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminB6-Consumer
+B7,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Biotin-Consumer
+Beet nitrates,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Nitrate
+Benfotiamine,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Benfotiamine
+Berberine,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1126.html
+Beta-glucans,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1072.html
+Betaine (TMG),Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1083.html
+Biotin,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Biotin-Consumer
+Boron,Mineral,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/902.html
+Bromelain,Enzyme,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/895.html
+CLA,Fatty acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/790.html
+Calcium,Mineral,ODS,https://ods.od.nih.gov/factsheets/Calcium-Consumer
+Calcium-D-glucarate,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Calcium-D-glucarate
+Choline,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1000.html
+Chromium,Mineral,ODS,https://ods.od.nih.gov/factsheets/Chromium-Consumer
+Cinnamon polyphenols,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1006.html
+CoQ10,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/938.html
+Collagen peptides,Protein,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1009.html
+Copper,Mineral,ODS,https://ods.od.nih.gov/factsheets/Copper-Consumer
+Creatine,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/940.html
+Curcumin,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/662.html
+D-aspartic acid,Amino acid,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/D-Aspartic-acid
+DIM,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1122.html
+EGCG,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1017.html
+Fiber,Macronutrient,MEDLINEPLUS,https://medlineplus.gov/dietaryfiber.html
+Fisetin,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Fisetin
+Flax lignans,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Secoisolariciresinol-diglucoside
+Folate,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Folate-Consumer
+GABA-related compounds,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/940.html
+Garlic (allicin),Herb,NCCIH,https://www.nccih.nih.gov/health/garlic
+Glycine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1001.html
+Holy basil,Herb,NCCIH,https://www.nccih.nih.gov/health/holy-basil
+Inositol,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1013.html
+Iodine,Mineral,ODS,https://ods.od.nih.gov/factsheets/Iodine-Consumer
+Iron,Mineral,ODS,https://ods.od.nih.gov/factsheets/Iron-Consumer
+L-arginine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/875.html
+L-carnitine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1010.html
+L-citrulline,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1011.html
+L-glutamine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1012.html
+L-theanine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1018.html
+Leucine,Amino acid,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Leucine
+Lion's Mane,Herb,NCCIH,https://www.nccih.nih.gov/health/mushrooms
+Lipase,Enzyme,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1003.html
+MSM,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/807.html
+Magnesium,Mineral,ODS,https://ods.od.nih.gov/factsheets/Magnesium-Consumer
+Magnesium threonate,Mineral,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Magnesium-L-threonate
+Manganese,Mineral,ODS,https://ods.od.nih.gov/factsheets/Manganese-Consumer
+Melatonin,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/940.html
+Myo-inositol,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1013.html
+NAC,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/meds/a682613.html
+NAD+ boosters,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Nicotinamide-riboside
+NAD+ precursors,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Nicotinamide-mononucleotide
+Niacin,Vitamin,ODS,https://ods.od.nih.gov/factsheets/Niacin-Consumer
+Omega-3,Fatty acid,ODS,https://ods.od.nih.gov/factsheets/Omega3FattyAcids-Consumer
+Omega-3 (DHA),Fatty acid,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Docosahexaenoic-acid
+Oregano oil,Herb,NCCIH,https://www.nccih.nih.gov/health/oregano
+Panax ginseng,Herb,NCCIH,https://www.nccih.nih.gov/health/asian-ginseng
+Papain,Enzyme,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/761.html
+Phosphatidylcholine,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1014.html
+Phosphatidylserine,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1015.html
+Phosphorus,Mineral,ODS,https://ods.od.nih.gov/factsheets/Phosphorus-Consumer
+Plant sterols,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1008.html
+Polyphenols,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Polyphenols
+Potassium,Mineral,ODS,https://ods.od.nih.gov/factsheets/Potassium-Consumer
+Prebiotics,Macronutrient,MEDLINEPLUS,https://medlineplus.gov/prebiotics.html
+Probiotics,Macronutrient,MEDLINEPLUS,https://medlineplus.gov/probiotics.html
+Proline,Amino acid,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Proline
+Protease,Enzyme,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1004.html
+Quercetin,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/294.html
+Red yeast rice,Herb,NCCIH,https://www.nccih.nih.gov/health/red-yeast-rice
+Resveratrol,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/307.html
+Rhodiola,Herb,NCCIH,https://www.nccih.nih.gov/health/rhodiola
+Ribose,Bioactive,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1016.html
+Selenium,Mineral,ODS,https://ods.od.nih.gov/factsheets/Selenium-Consumer
+Silica,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Silica
+Soluble fiber,Macronutrient,MEDLINEPLUS,https://medlineplus.gov/dietaryfiber.html
+Spermidine,Bioactive,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Spermidine
+Taurine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1017.html
+Tryptophan,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/326.html
+Tyrosine,Amino acid,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1019.html
+Vitamin A,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminA-Consumer
+Vitamin C,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminC-Consumer
+Vitamin D,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminD-Consumer
+Vitamin E,Vitamin,ODS,https://ods.od.nih.gov/factsheets/VitaminE-Consumer
+Vitamin K2,Vitamin,PUBCHEM,https://pubchem.ncbi.nlm.nih.gov/compound/Menaquinone-7
+Whey protein,Protein,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1009.html
+White kidney bean extract,Herb,MEDLINEPLUS,https://medlineplus.gov/druginfo/natural/1120.html
+Zinc,Mineral,ODS,https://ods.od.nih.gov/factsheets/Zinc-Consumer
