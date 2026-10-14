@@ -27,7 +27,7 @@ for information about dietary supplements.
 - Search products by name
 - Filter by brand and supplement form
 - Barcode lookup
-- Deep‑linking support (?product_id=...)
+- Deep‑linking support (?dsld_id=...)
 - Product overview including:
 - Product name
 - Brand
@@ -91,5 +91,4 @@ These sources provide product labels, ingredient metadata, safety summaries, RDA
 - Pandas (data processing)
 - PyMuPDF (PDF → image extraction)
 - ECharts via streamlit‑echarts (interactive network graph)
-- PyVis (legacy graph support, optional)
 - Git LFS (large dataset storage)

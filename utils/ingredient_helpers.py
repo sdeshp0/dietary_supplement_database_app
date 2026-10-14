@@ -2,8 +2,6 @@ import json
 from pathlib import Path
 import pandas as pd
 import streamlit as st
-from pyvis.network import Network
-from streamlit_echarts import st_echarts
 
 
 # ---------------------------------------------------------
@@ -71,7 +69,7 @@ def load_ontology():
     """
     Loads supplement_ontology.csv and normalizes key columns.
     """
-    df = pd.read_csv(ONTOLOGY_CSV, encoding="cp1252")
+    df = pd.read_csv(ONTOLOGY_CSV, encoding="utf-8")
     for col in ["mechanism", "category", "compound"]:
         df[col] = df[col].astype(str).str.strip()
     return df
@@ -82,7 +80,7 @@ def load_metadata():
     """
     Loads compound_metadata.csv and strips whitespace.
     """
-    df = pd.read_csv(METADATA_CSV, encoding="cp1252")
+    df = pd.read_csv(METADATA_CSV, encoding="utf-8")
     for col in df.columns:
         df[col] = df[col].astype(str).str.strip()
     return df
@@ -93,59 +91,9 @@ def load_mechanism_metadata():
     """
     Loads mechanism_metadata.csv and normalizes mechanism names.
     """
-    df = pd.read_csv(MECHANISM_META_CSV, encoding="cp1252")
+    df = pd.read_csv(MECHANISM_META_CSV, encoding="utf-8")
     df["mechanism"] = df["mechanism"].astype(str).str.strip()
     return df
-
-
-# ---------------------------------------------------------
-# GRAPH BUILDING
-# ---------------------------------------------------------
-def build_graph(df):
-    """
-    Builds a PyVis graph of mechanisms → compounds.
-    """
-    net = Network(height="650px", width="100%", bgcolor="#FFFFFF", font_color="black")
-
-    net.barnes_hut(
-        gravity=-20000,
-        central_gravity=0.3,
-        spring_length=150,
-        spring_strength=0.02,
-        damping=0.09,
-    )
-
-    # Mechanism nodes
-    for mech in df["mechanism"].unique():
-        net.add_node(
-            mech,
-            label=mech,
-            color="#4CAF50",
-            shape="dot",
-            size=30,
-            font={"size": 22},
-        )
-
-    # Compound nodes + edges
-    for _, row in df.iterrows():
-        comp = row["compound"]
-        cat = row["category"]
-        mech = row["mechanism"]
-
-        color = CATEGORY_COLORS.get(cat, "#9E9E9E")
-
-        net.add_node(
-            comp,
-            label=comp,
-            color=color,
-            shape="ellipse",
-            size=18,
-            font={"size": 18},
-        )
-
-        net.add_edge(mech, comp, color="#999999")
-
-    return net
 
 
 # ---------------------------------------------------------

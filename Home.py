@@ -63,6 +63,10 @@ st.markdown("---")
 # FOOTER
 # ---------------------------------------------------------
 st.caption(
+    "For information only, not medical advice. Talk to a doctor or pharmacist "
+    "before starting a supplement."
+)
+st.caption(
     "This app integrates DSLD product data and ODS ingredient metadata to provide a unified, "
     "interactive exploration experience for supplements and their components."
 )

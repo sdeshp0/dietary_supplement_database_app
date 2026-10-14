@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-from pathlib import Path
-from streamlit.components.v1 import html
 from streamlit_echarts import st_echarts
 
 
@@ -9,7 +7,6 @@ from utils.ingredient_helpers import (
     load_ontology,
     load_metadata,
     load_mechanism_metadata,
-    build_graph,
     safe_str,
     safe_json,
     CATEGORY_COLORS,
@@ -33,6 +30,10 @@ st.write(
     "common dietary supplement ingredients."
 )
 st.caption("*Note that detailed information is currently only available for Vitamins and Minerals")
+st.caption(
+    "For information only, not medical advice. Talk to a doctor or pharmacist "
+    "before starting a supplement."
+)
 
 # ---------------------------------------------------------
 # LOAD DATA
@@ -102,38 +103,7 @@ merged = filtered.merge(metadata, on=["compound", "category"], how="left")
 # Table
 with st.expander("View Filtered Results"):
     table = merged[["mechanism", "category", "compound"]].drop_duplicates()
-    st.dataframe(table, use_container_width=True, hide_index=True)
-
-# PyVis Graph
-_='''
-with st.expander("Mechanism → Compound Graph"):
-    st.subheader("Mechanism → Compound Graph")
-
-    # Legend
-    st.markdown("### Legend")
-    legend_cols = st.columns(4)
-    for i, (cat, color) in enumerate(CATEGORY_COLORS.items()):
-        with legend_cols[i % 4]:
-            st.markdown(
-                f"""
-                <div style="display:flex;align-items:center;margin-bottom:6px;">
-                    <div style="width:16px;height:16px;background:{color};
-                                border-radius:3px;margin-right:8px;"></div>
-                    <span>{cat}</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    st.markdown("---")
-
-    # Graph
-    net = build_graph(filtered)
-    out = Path("ingredient_graph.html")
-    net.write_html(str(out))
-    html(out.read_text(), height=650)
-
-'''
+    st.dataframe(table, width="stretch", hide_index=True)
 
 # ECharts Graph
 with st.expander("Mechanism → Compound Graph"):
@@ -238,13 +208,11 @@ with tab_overview:
     if fs:
         st.markdown(f"**Food sources:** {fs}")
 
-    tsr = safe_str(row.get("typical_supplement_range"))
-    if tsr:
-        st.markdown(f"**Typical supplement-related values:** {tsr}")
-
-    url = safe_str(row.get("ods_url"))
+    url = safe_str(row.get("source_url"))
     if url.startswith("http"):
-        st.markdown(f"[ODS Fact Sheet]({url})")
+        source = safe_str(row.get("source_type")) or "Source"
+        label = "ODS Fact Sheet" if source == "ODS" else f"{source.title()} page"
+        st.markdown(f"[{label}]({url})")
 
 # ---------------------------------------------------------
 # SAFETY TAB
@@ -277,6 +245,9 @@ with tab_rda:
         st.markdown("#### UL")
         st.table(pd.DataFrame(ul))
     else:
-        st.info("No UL data.")
+        st.info(
+            "No upper limit (UL) in this dataset. Some nutrients have no UL, "
+            "and others were not captured; check the fact sheet linked in the Overview tab."
+        )
 
     st.caption("Values from NIH ODS fact sheets.")

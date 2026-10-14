@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 import json
+from io import StringIO
+from pathlib import Path
 
 # ---------------------------------------------------------
 # GLOBAL HELPERS
@@ -50,16 +52,18 @@ def scrape_ods(url, compound, category):
                     return clean_space(" ".join(content))
         return None
 
-    def extract_table(keywords):
-        tables = soup.find_all("table")
-        for table in tables:
-            if any(k.lower() in table.get_text().lower() for k in keywords):
-                try:
-                    df = pd.read_html(str(table))[0]
-                    df.columns = [str(c).strip() for c in df.columns]
-                    return df.to_dict(orient="records")
-                except:
-                    continue
+    def extract_table(header_keywords):
+        # Match on the table's own column headers. Matching on the whole table
+        # text picked up the RDA table for "ul" (as in "Adults").
+        for table in soup.find_all("table"):
+            try:
+                df = pd.read_html(StringIO(str(table)))[0]
+            except Exception:
+                continue
+            df.columns = [clean_space(str(c)) for c in df.columns]
+            headers = " ".join(df.columns).lower()
+            if any(k.lower() in headers for k in header_keywords):
+                return df.to_dict(orient="records")
         return None
 
     return {
@@ -71,8 +75,8 @@ def scrape_ods(url, compound, category):
         "food_sources": extract_section(["what foods", "food sources"]),
         "safety_overview": extract_section(["harmful", "safety", "too much"]),
         "interactions_summary": extract_section(["interact", "interactions"]),
-        "rda_json": json.dumps(extract_table(["recommended", "adequate", "rda"])),
-        "ul_json": json.dumps(extract_table(["upper", "ul"])),
+        "rda_json": json.dumps(extract_table(["recommended amount", "adequate intake"])),
+        "ul_json": json.dumps(extract_table(["upper limit"])),
         "typical_supplement_range": extract_dosage(text),
         "notes": "Extracted from NIH ODS Consumer Fact Sheet"
     }
@@ -204,16 +208,18 @@ def scrape_row(row):
         "notes": f"No scraper implemented for {source_type}"
     }
 
+DATA_DIR = Path(__file__).parents[1] / "data"
+
 # ---------------------------------------------------------
 # LOAD FILES
 # ---------------------------------------------------------
-ontology = pd.read_csv("data/supplement_ontology.csv")
+ontology = pd.read_csv(DATA_DIR / "supplement_ontology.csv")
 ontology["compound"] = ontology["compound"].astype(str).str.strip()
 ontology["category"] = ontology["category"].astype(str).str.strip()
 
 unique_compounds = ontology[["compound", "category"]].drop_duplicates()
 
-sources = pd.read_csv("compound_sources.csv")
+sources = pd.read_csv(DATA_DIR / "compound_sources.csv")
 sources["compound"] = sources["compound"].astype(str).str.strip()
 sources["category"] = sources["category"].astype(str).str.strip()
 
@@ -251,6 +257,6 @@ for _, row in to_scrape.iterrows():
         })
 
 meta_df = pd.DataFrame(results)
-meta_df.to_csv("compound_metadata.csv", index=False)
+meta_df.to_csv(DATA_DIR / "compound_metadata.csv", index=False)
 
 meta_df.head()
