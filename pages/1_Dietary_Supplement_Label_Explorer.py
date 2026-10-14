@@ -9,6 +9,8 @@ from utils.dsld_helpers import (
     extract_brand_fields,
     find_related_products,
     fetch_label_image,
+    normalize_barcode,
+    build_supplement_facts_table,
 )
 
 # ---------------------------------------------------------
@@ -24,6 +26,11 @@ st.write(
     "Explore products from the NIH Dietary Supplement Label Database (DSLD) "
     "by searching product names, brands, supplement forms, or scanning barcodes."
 )
+st.caption(
+    "For information only, not medical advice. Label data comes from the NIH DSLD "
+    "and may not match the product currently on sale. Talk to a doctor or pharmacist "
+    "before starting a supplement."
+)
 
 # ---------------------------------------------------------
 # LOAD DATA
@@ -35,19 +42,10 @@ company_df = tables["companyInformation"]
 facts_df = tables["dietarySupplementFacts"]
 other_df = tables["otherIngredients"]
 
-# Ensure consistent types
-product_df["DSLD ID"] = product_df["DSLD ID"].astype(str)
-company_df["DSLD ID"] = company_df["DSLD ID"].astype(str)
-facts_df["DSLD ID"] = facts_df["DSLD ID"].astype(str)
-other_df["DSLD ID"] = other_df["DSLD ID"].astype(str)
-
-if "Bar Code" in product_df.columns:
-    product_df["Bar Code"] = product_df["Bar Code"].astype(str).str.strip()
-
-# Identify supplement form column
+# Identify supplement form column (DSLD calls it "Supplement Form [LanguaL]")
 FORM_COL = None
 for c in product_df.columns:
-    if c.lower() in ["dosage form", "form", "supplement form"]:
+    if c.lower().startswith(("supplement form", "dosage form")) or c.lower() == "form":
         FORM_COL = c
         break
 
@@ -139,9 +137,12 @@ if lookup_mode == "Barcode":
 
     barcode_input = st.sidebar.text_input("Enter barcode (UPC):", "")
 
-    if barcode_input:
-        barcode_input = barcode_input.strip()
-        match = product_df[product_df["Bar Code"] == barcode_input]
+    barcode_digits = normalize_barcode(barcode_input)
+
+    if barcode_input and not barcode_digits:
+        st.sidebar.warning("A barcode should contain digits.")
+    elif barcode_digits:
+        match = product_df[product_df["Bar Code (normalized)"] == barcode_digits]
         if match.empty:
             st.sidebar.warning("No product found for this barcode.")
         else:
@@ -196,13 +197,24 @@ with t1:
     )
     st.table(summary_df)
 
+    # Supplement Facts panel
+    st.markdown("### Supplement Facts")
+    facts_table = build_supplement_facts_table(facts_df, product_id)
+    if facts_table.empty:
+        st.info("No Supplement Facts data for this product.")
+    else:
+        serving = overview_data.get("Serving Size")
+        if serving:
+            st.caption(f"Per serving: {serving}")
+        st.dataframe(facts_table, hide_index=True, width="stretch")
+
     # Label PDF preview
     st.markdown("---")
     with st.expander("Product Label", expanded=False):
         img_bytes = fetch_label_image(product_id)
 
         if img_bytes:
-            st.image(img_bytes, caption="Product Label Preview", use_column_width=True)
+            st.image(img_bytes, caption="Product Label Preview", width="stretch")
         else:
             st.info("Label preview unavailable. You can still open the PDF below.")
 
@@ -246,6 +258,7 @@ with t2:
         related = find_related_products(
             product_df=product_df,
             company_info_df=company_df,
+            facts_df=facts_df,
             product_id=product_id,
             on_market_only=on_market_only,
         )
