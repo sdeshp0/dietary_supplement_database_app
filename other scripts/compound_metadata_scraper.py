@@ -1,262 +1,272 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-import re
+"""
+Builds data/compound_metadata.csv from the sources in data/compound_sources.csv.
+
+Run from anywhere:  python "other scripts/compound_metadata_scraper.py"
+
+Sources:
+- ODS: the official ODS Fact Sheet API (XML), not the HTML pages, which
+  reject scripted requests with 403.
+- NCCIH: "Herbs at a Glance" pages, split on their h2 sections.
+- PUBCHEM: the PUG REST description endpoint (the compound web pages are
+  rendered by JavaScript, so scraping them returned nothing).
+
+MedlinePlus herb and supplement monographs were retired on 2025-07-29, so
+those rows are skipped. If a compound fails to fetch, its previous row in
+compound_metadata.csv is kept rather than overwritten with an error.
+"""
+
 import json
+import re
+import time
+import xml.etree.ElementTree as ET
 from io import StringIO
 from pathlib import Path
+from urllib.parse import quote, urlparse
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 # ---------------------------------------------------------
 # GLOBAL HELPERS
 # ---------------------------------------------------------
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+DATA_DIR = Path(__file__).parents[1] / "data"
 
-def safe_get(url):
-    r = requests.get(url, headers=HEADERS, timeout=20)
+HEADERS = {
+    "User-Agent": (
+        "dietary-supplement-database-app/1.0 "
+        "(+https://github.com/sdeshp0/dietary_supplement_database_app)"
+    ),
+    "Accept": "text/html,application/xml,application/json;q=0.9,*/*;q=0.8",
+}
+REQUEST_DELAY_S = 1.0  # be polite: one request per second
+
+ODS_API = "https://ods.od.nih.gov/api/index.aspx"
+PUBCHEM_DESCRIPTION = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{}/description/JSON"
+
+COLUMNS = [
+    "compound", "category", "source_type", "source_url",
+    "primary_functions", "food_sources", "safety_overview", "interactions_summary",
+    "rda_json", "ul_json", "typical_supplement_range", "notes",
+]
+
+session = requests.Session()
+session.headers.update(HEADERS)
+
+
+def fetch(url, params=None):
+    time.sleep(REQUEST_DELAY_S)
+    r = session.get(url, params=params, timeout=30)
     r.raise_for_status()
-    return BeautifulSoup(r.text, "html.parser")
+    return r
+
 
 def clean_space(text):
     return re.sub(r"\s+", " ", text).strip()
 
-def extract_dosage(text):
-    if not text:
-        return None
-    text = text.lower()
-    full = re.findall(r"\b\d{1,4}\s?(?:mg|mcg|iu)\b", text)
-    if full:
-        return ", ".join(sorted(set(full)))
-    ranges = re.findall(r"\b\d{1,4}\s?-\s?\d{1,4}\b", text)
-    if ranges:
-        return ", ".join(sorted(set(ranges)))
+
+def empty_record(compound, category, source_type, url, notes):
+    record = dict.fromkeys(COLUMNS)
+    record.update(compound=compound, category=category, source_type=source_type,
+                  source_url=url, notes=notes)
+    return record
+
+
+def extract_section(soup, keywords):
+    """
+    Text of the first h2/h3 section whose heading contains a keyword, up to
+    the next h2/h3. Works whether the section's paragraphs are siblings of
+    the heading or nested in wrappers.
+    """
+    for h in soup.find_all(["h2", "h3"]):
+        if not any(k.lower() in h.get_text(" ", strip=True).lower() for k in keywords):
+            continue
+        content = []
+        for el in h.find_all_next(["h2", "h3", "p", "ul", "ol"]):
+            if el.name in ["h2", "h3"]:
+                break
+            if el.find_parent(["ul", "ol", "table"]):
+                continue  # already included with its list, or part of a table
+            content.append(el.get_text(" ", strip=True))
+        if content:
+            return clean_space(" ".join(content))
     return None
 
+
+def extract_table(soup, header_keywords):
+    """
+    Records of the first table whose column headers contain a keyword.
+    Matching on headers (not the whole table text) keeps "ul" in "Adults"
+    from selecting the RDA table as the UL table.
+    """
+    for table in soup.find_all("table"):
+        try:
+            df = pd.read_html(StringIO(str(table)))[0]
+        except Exception:
+            continue
+        df.columns = [clean_space(str(c)) for c in df.columns]
+        headers = " ".join(df.columns).lower()
+        if any(k.lower() in headers for k in header_keywords):
+            return df.to_dict(orient="records")
+    return None
+
+
+def to_json(records):
+    return json.dumps(records) if records else None
+
+
 # ---------------------------------------------------------
-# ODS SCRAPER (Vitamins, Minerals, Omega-3)
+# ODS (Vitamins, Minerals, a few botanicals) via the Fact Sheet API
 # ---------------------------------------------------------
+def ods_resource_name(url):
+    """
+    https://ods.od.nih.gov/factsheets/VitaminD-Consumer/ -> VitaminD
+    """
+    slug = urlparse(url).path.rstrip("/").split("/")[-1]
+    return re.sub(r"-(Consumer|HealthProfessional)$", "", slug, flags=re.I)
+
+
 def scrape_ods(url, compound, category):
-    soup = safe_get(url)
-    text = clean_space(soup.get_text(" ", strip=True))
+    resource = ods_resource_name(url)
+    r = fetch(ODS_API, params={
+        "resourcename": resource,
+        "readinglevel": "Consumer",
+        "outputformat": "XML",
+    })
 
-    def extract_section(keywords):
-        headers = soup.find_all(["h2", "h3"])
-        for h in headers:
-            if any(k.lower() in h.get_text(strip=True).lower() for k in keywords):
-                content = []
-                for sib in h.find_next_siblings():
-                    if sib.name in ["h2", "h3"]:
-                        break
-                    if sib.name in ["p", "ul", "ol"]:
-                        content.append(sib.get_text(" ", strip=True))
-                if content:
-                    return clean_space(" ".join(content))
-        return None
+    root = ET.fromstring(r.content)
+    error = root.find(".//{*}ErrorMessage")
+    if error is not None and error.text:
+        raise ValueError(f"ODS API error for {resource}: {error.text}")
 
-    def extract_table(header_keywords):
-        # Match on the table's own column headers. Matching on the whole table
-        # text picked up the RDA table for "ul" (as in "Adults").
-        for table in soup.find_all("table"):
-            try:
-                df = pd.read_html(StringIO(str(table)))[0]
-            except Exception:
-                continue
-            df.columns = [clean_space(str(c)) for c in df.columns]
-            headers = " ".join(df.columns).lower()
-            if any(k.lower() in headers for k in header_keywords):
-                return df.to_dict(orient="records")
-        return None
+    content = root.find(".//{*}Content")
+    if content is None or not (content.text or "").strip():
+        raise ValueError(f"ODS API returned no content for {resource}")
 
-    return {
-        "compound": compound,
-        "category": category,
-        "source_type": "ODS",
-        "source_url": url,
-        "primary_functions": extract_section(["what is", "what does"]),
-        "food_sources": extract_section(["what foods", "food sources"]),
-        "safety_overview": extract_section(["harmful", "safety", "too much"]),
-        "interactions_summary": extract_section(["interact", "interactions"]),
-        "rda_json": json.dumps(extract_table(["recommended amount", "adequate intake"])),
-        "ul_json": json.dumps(extract_table(["upper limit"])),
-        "typical_supplement_range": extract_dosage(text),
-        "notes": "Extracted from NIH ODS Consumer Fact Sheet"
-    }
+    soup = BeautifulSoup(content.text, "html.parser")
+
+    record = empty_record(compound, category, "ODS", url,
+                          f"ODS Fact Sheet API (resourcename={resource}, Consumer)")
+    record.update(
+        primary_functions=extract_section(soup, ["what is", "what does"]),
+        food_sources=extract_section(soup, ["what foods", "food sources"]),
+        safety_overview=extract_section(soup, ["harmful", "safety", "too much"]),
+        interactions_summary=extract_section(soup, ["interact"]),
+        rda_json=to_json(extract_table(soup, ["recommended amount", "adequate intake"])),
+        ul_json=to_json(extract_table(soup, ["upper limit"])),
+    )
+    return record
+
 
 # ---------------------------------------------------------
-# NCCIH SCRAPER (Herbs, Botanicals, Mushrooms)
+# NCCIH (Herbs, Botanicals, Mushrooms)
 # ---------------------------------------------------------
 def scrape_nccih(url, compound, category):
-    soup = safe_get(url)
+    soup = BeautifulSoup(fetch(url).text, "html.parser")
 
-    body = soup.find("div", class_="field--name-body")
-    text = clean_space(body.get_text(" ", strip=True)) if body else ""
+    record = empty_record(compound, category, "NCCIH", url, "NCCIH Herbs at a Glance")
+    record.update(
+        primary_functions=extract_section(soup, ["background", "what have we learned"]),
+        safety_overview=extract_section(soup, ["safety"]),
+        interactions_summary=extract_section(soup, ["keep in mind"]),
+    )
+    return record
 
-    def find_section(label):
-        strong = soup.find("strong", string=lambda s: s and label.lower() in s.lower())
-        if strong:
-            parent = strong.parent
-            return clean_space(parent.get_text(" ", strip=True))
-        return None
-
-    return {
-        "compound": compound,
-        "category": category,
-        "source_type": "NCCIH",
-        "source_url": url,
-        "primary_functions": find_section("What"),
-        "food_sources": None,
-        "safety_overview": find_section("Safety"),
-        "interactions_summary": find_section("Interaction"),
-        "rda_json": None,
-        "ul_json": None,
-        "typical_supplement_range": extract_dosage(text),
-        "notes": "Extracted from NCCIH herb monograph"
-    }
 
 # ---------------------------------------------------------
-# MEDLINEPLUS SCRAPER (Bioactives, Amino Acids, Enzymes)
-# ---------------------------------------------------------
-def scrape_medlineplus(url, compound, category):
-    soup = safe_get(url)
-
-    summary = soup.find("p", class_="drug-summary")
-    summary_text = clean_space(summary.get_text()) if summary else None
-
-    sections = soup.find_all("div", class_="section")
-
-    def find_section(label):
-        for sec in sections:
-            header = sec.find("h2")
-            if header and label.lower() in header.get_text(strip=True).lower():
-                return clean_space(sec.get_text(" ", strip=True))
-        return None
-
-    all_text = clean_space(soup.get_text(" ", strip=True))
-
-    return {
-        "compound": compound,
-        "category": category,
-        "source_type": "MEDLINEPLUS",
-        "source_url": url,
-        "primary_functions": summary_text or find_section("What"),
-        "food_sources": None,
-        "safety_overview": find_section("Side Effects") or find_section("Safety"),
-        "interactions_summary": find_section("Interactions"),
-        "rda_json": None,
-        "ul_json": None,
-        "typical_supplement_range": extract_dosage(all_text),
-        "notes": "Extracted from MedlinePlus natural products database"
-    }
-
-# ---------------------------------------------------------
-# PUBCHEM SCRAPER (Fallback)
+# PUBCHEM (fallback for single compounds) via PUG REST
 # ---------------------------------------------------------
 def scrape_pubchem(url, compound, category):
-    soup = safe_get(url)
+    name = urlparse(url).path.rstrip("/").split("/")[-1].replace("-", " ")
+    data = fetch(PUBCHEM_DESCRIPTION.format(quote(name))).json()
 
-    summary = soup.find("section", {"id": "section-Overview"})
-    summary_text = clean_space(summary.get_text(" ", strip=True)) if summary else None
+    descriptions = [
+        info["Description"]
+        for info in data.get("InformationList", {}).get("Information", [])
+        if info.get("Description")
+    ]
 
-    all_text = clean_space(soup.get_text(" ", strip=True))
+    record = empty_record(compound, category, "PUBCHEM", url, "PubChem compound description")
+    record["primary_functions"] = descriptions[0] if descriptions else None
+    return record
 
-    return {
-        "compound": compound,
-        "category": category,
-        "source_type": "PUBCHEM",
-        "source_url": url,
-        "primary_functions": summary_text,
-        "food_sources": None,
-        "safety_overview": None,
-        "interactions_summary": None,
-        "rda_json": None,
-        "ul_json": None,
-        "typical_supplement_range": extract_dosage(all_text),
-        "notes": "Extracted from PubChem compound summary"
-    }
 
 # ---------------------------------------------------------
 # ROUTER
 # ---------------------------------------------------------
+SCRAPERS = {
+    "ODS": scrape_ods,
+    "NCCIH": scrape_nccih,
+    "PUBCHEM": scrape_pubchem,
+}
+
+
 def scrape_row(row):
     compound = row["compound"]
     category = row["category"]
     source_type = row["source_type"].upper()
     url = row["source_url"]
 
+    scraper = SCRAPERS.get(source_type)
+    if scraper is None:
+        raise ValueError(f"No scraper for {source_type} (MedlinePlus monographs were retired)")
+
     print(f"Scraping {compound} ({category}) from {source_type} → {url}")
+    return scraper(url, compound, category)
 
-    if source_type == "ODS":
-        return scrape_ods(url, compound, category)
-    if source_type == "NCCIH":
-        return scrape_nccih(url, compound, category)
-    if source_type == "MEDLINEPLUS":
-        return scrape_medlineplus(url, compound, category)
-    if source_type == "PUBCHEM":
-        return scrape_pubchem(url, compound, category)
-
-    return {
-        "compound": compound,
-        "category": category,
-        "source_type": source_type,
-        "source_url": url,
-        "primary_functions": None,
-        "food_sources": None,
-        "safety_overview": None,
-        "interactions_summary": None,
-        "rda_json": None,
-        "ul_json": None,
-        "typical_supplement_range": None,
-        "notes": f"No scraper implemented for {source_type}"
-    }
-
-DATA_DIR = Path(__file__).parents[1] / "data"
 
 # ---------------------------------------------------------
-# LOAD FILES
+# MAIN
 # ---------------------------------------------------------
-ontology = pd.read_csv(DATA_DIR / "supplement_ontology.csv")
-ontology["compound"] = ontology["compound"].astype(str).str.strip()
-ontology["category"] = ontology["category"].astype(str).str.strip()
+def main():
+    ontology = pd.read_csv(DATA_DIR / "supplement_ontology.csv", encoding="utf-8")
+    ontology["compound"] = ontology["compound"].astype(str).str.strip()
+    ontology["category"] = ontology["category"].astype(str).str.strip()
+    unique_compounds = ontology[["compound", "category"]].drop_duplicates()
 
-unique_compounds = ontology[["compound", "category"]].drop_duplicates()
+    sources = pd.read_csv(DATA_DIR / "compound_sources.csv", encoding="utf-8")
+    sources["compound"] = sources["compound"].astype(str).str.strip()
+    sources["category"] = sources["category"].astype(str).str.strip()
 
-sources = pd.read_csv(DATA_DIR / "compound_sources.csv")
-sources["compound"] = sources["compound"].astype(str).str.strip()
-sources["category"] = sources["category"].astype(str).str.strip()
+    merged = unique_compounds.merge(sources, on=["compound", "category"], how="left")
 
-merged = unique_compounds.merge(sources, on=["compound", "category"], how="left")
+    missing = merged[merged["source_type"].isna()]
+    if not missing.empty:
+        print("⚠️ Missing source mappings for:", ", ".join(missing["compound"]))
 
-missing = merged[merged["source_type"].isna()]
-if not missing.empty:
-    print("⚠️ Missing source mappings for:")
-    print(missing)
+    to_scrape = merged.dropna(subset=["source_type", "source_url"])
 
-to_scrape = merged.dropna(subset=["source_type", "source_url"])
+    # Previous results, kept for any compound that fails this run
+    metadata_path = DATA_DIR / "compound_metadata.csv"
+    previous = {}
+    if metadata_path.exists():
+        prev_df = pd.read_csv(metadata_path, encoding="utf-8", dtype=str)
+        previous = {
+            (r["compound"], r["category"]): r.to_dict()
+            for _, r in prev_df.iterrows()
+        }
 
-# ---------------------------------------------------------
-# RUN SCRAPER
-# ---------------------------------------------------------
-results = []
-for _, row in to_scrape.iterrows():
-    try:
-        results.append(scrape_row(row))
-    except Exception as e:
-        print(f"❌ ERROR scraping {row['compound']}: {e}")
-        results.append({
-            "compound": row["compound"],
-            "category": row["category"],
-            "source_type": row["source_type"],
-            "source_url": row["source_url"],
-            "primary_functions": None,
-            "food_sources": None,
-            "safety_overview": None,
-            "interactions_summary": None,
-            "rda_json": None,
-            "ul_json": None,
-            "typical_supplement_range": None,
-            "notes": f"Error: {e}"
-        })
+    results, failures = [], []
+    for _, row in to_scrape.iterrows():
+        key = (row["compound"], row["category"])
+        try:
+            results.append(scrape_row(row))
+        except Exception as e:
+            print(f"❌ {row['compound']}: {e}")
+            failures.append(row["compound"])
+            if key in previous:
+                results.append(previous[key])
+            else:
+                results.append(empty_record(row["compound"], row["category"],
+                                            row["source_type"], row["source_url"],
+                                            f"Error: {e}"))
 
-meta_df = pd.DataFrame(results)
-meta_df.to_csv(DATA_DIR / "compound_metadata.csv", index=False)
+    meta_df = pd.DataFrame(results, columns=COLUMNS)
+    meta_df.to_csv(metadata_path, index=False, encoding="utf-8")
 
-meta_df.head()
+    print(f"\nWrote {len(meta_df)} rows to {metadata_path}")
+    print(f"Fetched {len(results) - len(failures)}, failed {len(failures)} (previous data kept)")
+
+
+if __name__ == "__main__":
+    main()
