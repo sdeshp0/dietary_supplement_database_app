@@ -208,7 +208,7 @@ def scrape_ods(row):
     record = empty_record(row["compound"], row["category"], "ODS", row["source_url"],
                           f"ODS Fact Sheet API ({resource}, Consumer)")
     record.update(
-        primary_functions=ods_heading_section(soup, ["what is", "what does"]),
+        primary_functions=ods_heading_section(soup, ["what is", "what are", "what does"]),
         food_sources=ods_heading_section(soup, ["what foods", "food sources"]),
         safety_overview=ods_heading_section(soup, ["harmful", "safety", "too much"]),
         interactions_summary=ods_heading_section(soup, ["interact"]),
