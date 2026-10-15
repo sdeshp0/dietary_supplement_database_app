@@ -1,5 +1,6 @@
 streamlit>=1.66
 pandas
+duckdb>=1.1
 numpy
 pymupdf
 requests
