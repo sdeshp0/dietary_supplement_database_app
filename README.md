@@ -77,13 +77,24 @@ dietary_supplement_database_app/
 ---
 
 ## 📚 Data Sources
-This app integrates authoritative data from:
-- NIH Dietary Supplement Label Database (DSLD)
-https://dsld.od.nih.gov
-- NIH Office of Dietary Supplements (ODS)
-https://ods.od.nih.gov 
+Products come from the NIH Dietary Supplement Label Database (DSLD), https://dsld.od.nih.gov
 
-These sources provide product labels, ingredient metadata, safety summaries, RDA/UL values, and more.
+Ingredient details (`data/compound_metadata.csv`) are built by
+`other scripts/compound_metadata_scraper.py` from the source mapped to each
+ingredient in `data/compound_sources.csv`:
+
+| `source_type` | Source | Ingredients |
+| --- | --- | --- |
+| `ODS` | NIH Office of Dietary Supplements, via the [Fact Sheet API](https://ods.od.nih.gov/api/) | 33 (vitamins, minerals, a few botanicals) |
+| `ODS_GROUP` | One row of an ODS group fact sheet (Exercise and Athletic Performance, Weight Loss) | 13 |
+| `NCCIH` | NIH National Center for Complementary and Integrative Health | 11 |
+| `HEALTH_CANADA` | [Health Canada Natural Health Product monographs](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/monosReq?lang=eng) | 17 |
+| `LPI` | [Linus Pauling Institute](https://lpi.oregonstate.edu/mic), Oregon State University | 5 |
+| `MSK` | [Memorial Sloan Kettering, About Herbs](https://www.mskcc.org/herbs) | 2 |
+| `NONE` | No official or credible monograph found | 16 |
+
+To refresh: `python "other scripts/compound_metadata_scraper.py"`. A compound
+that fails to fetch keeps its previous data.
 
 ## 🛠 Tech Stack
 - Python 3.10+
