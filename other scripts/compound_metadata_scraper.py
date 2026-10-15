@@ -39,10 +39,11 @@ DATA_DIR = Path(__file__).parents[1] / "data"
 
 HEADERS = {
     "User-Agent": (
-        "dietary-supplement-database-app/1.0 "
-        "(+https://github.com/sdeshp0/dietary_supplement_database_app)"
+        "Mozilla/5.0 (compatible; dietary-supplement-database-app/1.0; "
+        "+https://github.com/sdeshp0/dietary_supplement_database_app)"
     ),
-    "Accept": "text/html,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-CA,en;q=0.9",
 }
 REQUEST_DELAY_S = 1.0  # be polite: at most one request per second
 
@@ -219,39 +220,58 @@ def scrape_ods(row):
 
 def scrape_ods_group(row):
     """
-    One ingredient's row from the ingredient table of a group fact sheet.
-    The row is found by the start of its first cell (source_section).
+    One ingredient's entry from the ingredient table of a group fact sheet.
+    The table repeats each ingredient as a name-only row, a content row
+    (columns such as "Does it work?", "Is it safe?", "Bottom line") and a
+    "Bottom line" repeat, so the entry is the first row with content at or
+    after the row whose first cell starts with source_section.
     """
     resource, soup = ods_content(row["source_url"])
     label = row["source_section"].lower()
+
+    def cells_of(tr):
+        return [clean_space(c.get_text(" ")) for c in tr.find_all(["th", "td"])]
 
     for table in soup.find_all("table"):
         rows = table.find_all("tr")
         if not rows:
             continue
-        headers = [clean_space(c.get_text(" ")) for c in rows[0].find_all(["th", "td"])]
-        for tr in rows[1:]:
-            cells = [clean_space(c.get_text(" ")) for c in tr.find_all(["th", "td"])]
+        headers = cells_of(rows[0])
+
+        for i, tr in enumerate(rows[1:], start=1):
+            cells = cells_of(tr)
             if not cells or not cells[0].lower().startswith(label):
                 continue
 
+            content = next(
+                (c for c in (cells_of(r) for r in rows[i:i + 3]) if sum(bool(x) for x in c) >= 2),
+                None,
+            )
+            if content is None:
+                continue
+
             primary, safety = [], []
-            for header, cell in zip(headers[1:], cells[1:]):
+            for col, cell in enumerate(content):
                 if not cell:
                     continue
-                target = safety if re.search(r"safety|side effect", header, re.I) else primary
-                target.append(f"{header}: {cell}" if header else cell)
+                header = headers[col] if col < len(headers) else ""
+                if col == 0 or re.fullmatch(r"ingredients?", header, re.I):
+                    primary.insert(0, cell)  # the ingredient's own description
+                elif re.search(r"safe|side effect", header, re.I):
+                    safety.append(cell)
+                else:
+                    primary.append(f"{header.capitalize()}: {cell}" if header else cell)
 
             record = empty_record(row["compound"], row["category"], "ODS_GROUP",
                                   row["source_url"],
-                                  f"ODS Fact Sheet API ({resource}, row: {cells[0]})")
+                                  f"ODS Fact Sheet API ({resource}, entry: {row['source_section']})")
             record.update(
                 primary_functions=" ".join(primary) or None,
                 safety_overview=" ".join(safety) or None,
             )
             return record
 
-    raise ValueError(f"No row starting with '{row['source_section']}' in {resource}")
+    raise ValueError(f"No entry starting with '{row['source_section']}' in {resource}")
 
 
 # ---------------------------------------------------------
@@ -298,7 +318,13 @@ HC_STOPS = [
 ]
 
 
+HC_LIST = "https://webprod.hc-sc.gc.ca/nhpid-bdipsn/monosReq?lang=eng"
+
+
 def scrape_health_canada(row):
+    # The monograph pages are served by a Java web app that answers 404
+    # without a session, so open the monograph list first to get its cookie.
+    fetch(HC_LIST)
     lines = page_lines(fetch_soup(row["source_url"]))
 
     risk = [
