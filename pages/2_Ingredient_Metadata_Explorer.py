@@ -16,6 +16,15 @@ from utils.ingredient_helpers import (
 
 )
 
+SOURCE_LABELS = {
+    "ODS": "NIH Office of Dietary Supplements fact sheet",
+    "ODS_GROUP": "NIH Office of Dietary Supplements fact sheet",
+    "NCCIH": "NIH National Center for Complementary and Integrative Health",
+    "HEALTH_CANADA": "Health Canada monograph",
+    "LPI": "Linus Pauling Institute, Oregon State University",
+    "MSK": "Memorial Sloan Kettering, About Herbs",
+}
+
 # ---------------------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------------------
@@ -29,7 +38,11 @@ st.write(
     "Explore mechanisms, categories, health goals, and NIH ODS metadata for "
     "common dietary supplement ingredients."
 )
-st.caption("*Note that detailed information is currently only available for Vitamins and Minerals")
+st.caption(
+    "Ingredient details come from NIH (ODS and NCCIH), Health Canada monographs, "
+    "the Linus Pauling Institute at Oregon State University, and Memorial Sloan "
+    "Kettering. Some ingredients have no official or credible summary yet."
+)
 st.caption(
     "For information only, not medical advice. Talk to a doctor or pharmacist "
     "before starting a supplement."
@@ -199,7 +212,7 @@ with tab_overview:
             if goals:
                 st.caption(f"Health goals: {goals}")
 
-    # ODS metadata
+    # Source metadata
     pf = safe_str(row.get("primary_functions"))
     if pf:
         st.markdown(f"**Primary functions:** {pf}")
@@ -209,10 +222,16 @@ with tab_overview:
         st.markdown(f"**Food sources:** {fs}")
 
     url = safe_str(row.get("source_url"))
+    source = safe_str(row.get("source_type"))
+
+    dose = safe_str(row.get("typical_supplement_range"))
+    if dose:
+        st.markdown(f"**Dose ({SOURCE_LABELS.get(source, 'source')}):** {dose}")
     if url.startswith("http"):
-        source = safe_str(row.get("source_type")) or "Source"
-        label = "ODS Fact Sheet" if source == "ODS" else f"{source.title()} page"
-        st.markdown(f"[{label}]({url})")
+        label = SOURCE_LABELS.get(source, "Source")
+        st.markdown(f"Source: [{label}]({url})")
+    elif not pf:
+        st.info("No official or credible summary found for this ingredient yet.")
 
 # ---------------------------------------------------------
 # SAFETY TAB
@@ -250,4 +269,5 @@ with tab_rda:
             "and others were not captured; check the fact sheet linked in the Overview tab."
         )
 
-    st.caption("Values from NIH ODS fact sheets.")
+    if rda or ul:
+        st.caption("Values from NIH ODS fact sheets.")
