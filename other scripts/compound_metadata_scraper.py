@@ -318,29 +318,8 @@ HC_STOPS = [
 ]
 
 
-HC_LIST = "https://webprod.hc-sc.gc.ca/nhpid-bdipsn/monosReq?lang=eng"
-HC_SAVED_DIR = DATA_DIR / "raw" / "health_canada"
-
-
 def scrape_health_canada(row):
-    # Health Canada's server answers 404 to scripted requests, while the same
-    # links open in a browser. A page saved from the browser as
-    # data/raw/health_canada/<atid>.html is used instead of fetching.
-    atid = re.search(r"atid=([^&]+)", row["source_url"]).group(1)
-    saved = HC_SAVED_DIR / f"{atid}.html"
-
-    if saved.exists():
-        soup = BeautifulSoup(saved.read_bytes(), "html.parser")
-    else:
-        try:
-            fetch(HC_LIST)  # sets the session cookie, in case it helps
-            soup = fetch_soup(row["source_url"])
-        except requests.HTTPError as e:
-            raise ValueError(
-                f"{e}. Open {row['source_url']} in a browser and save it as {saved}"
-            ) from None
-
-    lines = page_lines(soup)
+    lines = page_lines(fetch_soup(row["source_url"]))
 
     risk = [
         section_text(lines, [r"caution\(s\) and warning\(s\)"], HC_STOPS),
