@@ -96,6 +96,27 @@ ingredient in `data/compound_sources.csv`:
 To refresh: `python "other scripts/compound_metadata_scraper.py"`. A compound
 that fails to fetch keeps its previous data.
 
+Health Canada's server answers 404 to scripts, so its monographs are read
+from pages saved in a browser (File > Save Page As, "Webpage, HTML only")
+into `data/raw/health_canada/` (not committed):
+
+| Monograph | Save as |
+| --- | --- |
+| [5-HTP](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=5htp&lang=eng) | `5htp.html` |
+| [Alpha-lipoic acid](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=alpha.lipoic.acid2&lang=eng) | `alpha.lipoic.acid2.html` |
+| [Amylase, Lipase, Papain, Protease](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=enzyme.multi&lang=eng) | `enzyme.multi.html` |
+| [Collagen peptides](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=hydrolized.collagen&lang=eng) | `hydrolized.collagen.html` |
+| [DIM](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=diindolylmethane&lang=eng) | `diindolylmethane.html` |
+| [Holy basil](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=ocimum.tenuliflorum.leaf.feuille2&lang=eng) | `ocimum.tenuliflorum.leaf.feuille2.html` |
+| [L-theanine](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=l.theanine2&lang=eng) | `l.theanine2.html` |
+| [MSM](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=msm2&lang=eng) | `msm2.html` |
+| [NAC](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=n-acetyl-l-cysteine2&lang=eng) | `n-acetyl-l-cysteine2.html` |
+| [Phosphatidylcholine](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=lecithin2&lang=eng) | `lecithin2.html` |
+| [Phosphatidylserine](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=phosphatidylserine2&lang=eng) | `phosphatidylserine2.html` |
+| [Plant sterols](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=free.plant.sterols.vegetaux&lang=eng) | `free.plant.sterols.vegetaux.html` |
+| [Taurine](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=taurine2&lang=eng) | `taurine2.html` |
+| [Tyrosine](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/atReq.do?atid=l.tyrosine2&lang=eng) | `l.tyrosine2.html` |
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
