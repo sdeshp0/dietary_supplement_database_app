@@ -46,10 +46,13 @@ def load_raw_csvs(con):
         files = sorted(RAW_DIR.glob(f"{prefix}_*.csv"))
         if not files:
             raise FileNotFoundError(f"No {prefix}_*.csv files in {RAW_DIR}")
+        # A view can't take query parameters, so the file list is inlined
+        file_list = ", ".join("'" + f.as_posix().replace("'", "''") + "'" for f in files)
+        # The CSV dialect is set explicitly: auto-detection misreads some quoted fields
         con.execute(
-            f"CREATE TEMP VIEW raw_{table} AS "
-            "SELECT * FROM read_csv(?, all_varchar = true, union_by_name = true)",
-            [[str(f) for f in files]],
+            f"CREATE TEMP VIEW raw_{table} AS SELECT * FROM read_csv([{file_list}], "
+            """header = true, delim = ',', quote = '"', escape = '"', """
+            "all_varchar = true, union_by_name = true)"
         )
     return f"DSLD CSV export in {RAW_DIR.name}/"
 
