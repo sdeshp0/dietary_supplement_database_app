@@ -134,7 +134,7 @@ def extract_overview_fields(row):
 
     fields = {
         "URL": row.get("URL", f"https://dsld.od.nih.gov/label/{row.get('DSLD ID', '')}"),
-        "DSLD ID": row.get("DSLD ID"),
+        "DSLD ID": str(row.get("DSLD ID")),  # text, like every other value in the table
         "Bar Code": barcode,   # <-- CLEANED
         "Product Name": row.get("Product Name"),
         "Brand Name": row.get("Brand Name"),
