@@ -12,6 +12,7 @@ import fitz  # PyMuPDF
 # ---------------------------------------------------------
 DATA_DIR = Path(__file__).parents[1] / "data"
 DB_PATH = DATA_DIR / "dsld.duckdb"
+ALIASES_CSV = DATA_DIR / "ingredient_aliases.csv"
 
 FORM_COL = "Supplement Form [LanguaL]"
 SEARCH_LIMIT = 50
@@ -121,6 +122,34 @@ def search_products(name="", brand=None, form=None, limit=SEARCH_LIMIT):
 
 
 # ---------------------------------------------------------
+# INGREDIENT TO COMPOUND MAPPING
+# ---------------------------------------------------------
+def normalize_ingredient_name(name):
+    """
+    Lowercase, trimmed, single-spaced form used as the key in ingredient_aliases.csv.
+    """
+    if not isinstance(name, str):
+        return ""
+    return " ".join(name.lower().split())
+
+
+@st.cache_data(show_spinner=False)
+def load_ingredient_aliases():
+    """
+    {normalized DSLD ingredient name: ontology compound}, from data/ingredient_aliases.csv.
+    """
+    aliases = pd.read_csv(ALIASES_CSV)
+    return dict(zip(aliases["dsld_name"], aliases["compound"]))
+
+
+def match_compound(name):
+    """
+    The ontology compound a DSLD ingredient name maps to, or None.
+    """
+    return load_ingredient_aliases().get(normalize_ingredient_name(name))
+
+
+# ---------------------------------------------------------
 # PRODUCT OVERVIEW EXTRACTION
 # ---------------------------------------------------------
 def extract_overview_fields(row):
@@ -183,8 +212,8 @@ def extract_factsheet_fields(subset):
 
 def build_supplement_facts_table(subset):
     """
-    Returns the label's Supplement Facts rows: ingredient, amount per serving
-    and % Daily Value, in label order.
+    Returns the label's Supplement Facts rows: ingredient, amount per serving,
+    % Daily Value and the ontology compound it maps to (or None), in label order.
     """
 
     if subset.empty:
@@ -205,6 +234,7 @@ def build_supplement_facts_table(subset):
         "Ingredient": subset["Ingredient"].fillna("").values,
         "Amount per serving": amount.values,
         "% Daily Value": daily_value.values,
+        "Compound": subset["Ingredient"].map(match_compound).values,
     })
 
 

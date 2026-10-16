@@ -102,6 +102,11 @@ ingredient in `data/compound_sources.csv`:
 To refresh: `python "other scripts/compound_metadata_scraper.py"`. A compound
 that fails to fetch keeps its previous data.
 
+`data/ingredient_aliases.csv` maps DSLD ingredient names (lowercased, single
+spaces) to ontology compounds, so a product's Supplement Facts can link each
+ingredient to its details. Edit it by hand; `python "other scripts/ingredient_mapping_report.py"`
+checks it and lists the most common names it doesn't cover yet.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)

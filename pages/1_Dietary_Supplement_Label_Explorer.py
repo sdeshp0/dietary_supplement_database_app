@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import streamlit as st
 import pandas as pd
 
@@ -184,7 +186,23 @@ with t1:
         serving = overview_data.get("Serving Size")
         if serving:
             st.caption(f"Per serving: {serving}")
-        st.dataframe(facts_table, hide_index=True, width="stretch")
+        # Link each ingredient that maps to an ontology compound to its
+        # entry in the Ingredient Metadata Explorer
+        facts_table["Compound"] = facts_table["Compound"].map(
+            lambda c: f"Ingredient_Metadata_Explorer?compound={quote(c)}" if isinstance(c, str) else ""
+        )
+        st.dataframe(
+            facts_table,
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "Compound": st.column_config.LinkColumn(
+                    "Ingredient details",
+                    help="Opens this ingredient in the Ingredient Metadata Explorer",
+                    display_text=r"compound=(.*)$",
+                ),
+            },
+        )
 
     # Label PDF preview
     st.markdown("---")

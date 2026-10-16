@@ -58,6 +58,13 @@ mech_meta = load_mechanism_metadata()
 # Merge mechanism metadata into ontology
 ontology = ontology.merge(mech_meta, on="mechanism", how="left")
 
+# A compound linked from the label explorer (?compound=...)
+linked_compound = st.query_params.get("compound")
+if linked_compound not in set(ontology["compound"]):
+    linked_compound = None
+elif linked_compound:
+    st.info(f"Showing **{linked_compound}**. Scroll down to Compound Details.")
+
 # ---------------------------------------------------------
 # TOP‑LEVEL FILTER: HEALTH GOAL
 # ---------------------------------------------------------
@@ -178,7 +185,11 @@ with st.expander("Mechanism → Compound Graph"):
 st.subheader("Compound Details")
 
 compounds = sorted(merged["compound"].unique())
-selected = st.selectbox("Select a compound", compounds)
+selected = st.selectbox(
+    "Select a compound",
+    compounds,
+    index=compounds.index(linked_compound) if linked_compound in compounds else 0,
+)
 
 row = merged[merged["compound"] == selected].iloc[0]
 
