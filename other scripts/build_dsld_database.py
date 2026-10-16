@@ -37,6 +37,13 @@ TABLES = {
 # Columns repeated from the product table in every other table
 REPEATED_COLUMNS = ["URL", "Product Name"]
 
+# Placeholders the DSLD export uses for a missing value, such as "N/A" for
+# Net Contents or "None" for a unit. Same list pandas treats as missing.
+NULL_STRINGS = [
+    "", "#N/A", "#N/A N/A", "#NA", "-1.#IND", "-1.#QNAN", "-NaN", "-nan", "1.#IND",
+    "1.#QNAN", "<NA>", "N/A", "NA", "NULL", "NaN", "None", "n/a", "nan", "null",
+]
+
 
 # ---------------------------------------------------------
 # LOADING THE SOURCE
@@ -52,7 +59,7 @@ def load_raw_csvs(con):
         con.execute(
             f"CREATE TEMP VIEW raw_{table} AS SELECT * FROM read_csv([{file_list}], "
             """header = true, delim = ',', quote = '"', escape = '"', """
-            "all_varchar = true, union_by_name = true)"
+            f"nullstr = {NULL_STRINGS}, all_varchar = true, union_by_name = true)"
         )
     return f"DSLD CSV export in {RAW_DIR.name}/"
 
