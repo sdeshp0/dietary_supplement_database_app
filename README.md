@@ -115,6 +115,14 @@ names that hold two compounds, such as "calcium ascorbate", are left blank for
 a person. Set `approve` to `yes` or `no` (correcting `suggested_compound` if
 needed), then run it with `--apply` to add the approved rows to the aliases file.
 
+`python "other scripts/check_aliases_gsrs.py"` checks the aliases against FDA's
+[Global Substance Registration System](https://gsrs.ncats.nih.gov), which records
+each substance's active moiety (magnesium citrate's is magnesium). It writes
+`data/ingredient_alias_gsrs_check.csv`, flagging aliases whose active moiety
+doesn't match their compound's, and lists which compounds each name on the
+review list matches. The first run makes about 2,600 requests to GSRS; replies
+are cached for later runs.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
