@@ -1,0 +1,4 @@
+data/raw_dsld/
+*.duckdb.tmp
+*.duckdb.wal
+__pycache__/

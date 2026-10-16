@@ -1,6 +1,6 @@
 import re
-import pickle
 from pathlib import Path
+import duckdb
 import pandas as pd
 import requests
 import streamlit as st
@@ -11,48 +11,113 @@ import fitz  # PyMuPDF
 # PATHS
 # ---------------------------------------------------------
 DATA_DIR = Path(__file__).parents[1] / "data"
-PICKLE_PATH = DATA_DIR / "dsld_tables.pkl"
+DB_PATH = DATA_DIR / "dsld.duckdb"
+
+FORM_COL = "Supplement Form [LanguaL]"
+SEARCH_LIMIT = 50
 
 
 # ---------------------------------------------------------
-# DATA LOADING
+# DATABASE ACCESS
 # ---------------------------------------------------------
 def normalize_barcode(val):
     """
     Reduces a UPC/EAN to its digits without leading zeros, so that
     "0 74312 70640 0", "074312706400" and "74312706400" all match.
+    The database stores the same form in "Bar Code (normalized)".
     """
     if not isinstance(val, str):
         return ""
     return re.sub(r"\D", "", val).lstrip("0")
 
 
+def parse_dsld_id(val):
+    """
+    DSLD IDs are integers; returns None for anything else (e.g. a bad URL parameter).
+    """
+    try:
+        return int(str(val).strip())
+    except (TypeError, ValueError):
+        return None
+
+
 @st.cache_resource
-def load_dsld_tables():
+def get_connection():
     """
-    Loads the preprocessed DSLD tables from a pickle file.
-    This is the ONLY data-loading entry point for the DSLD app.
-
-    Cached as a resource so the ~1.6 GB of tables is loaded once and shared,
-    rather than copied on every rerun. Callers must not mutate the tables.
+    One read-only connection to data/dsld.duckdb, shared by all sessions.
+    Queries read only the rows they need, so the app never holds the
+    full DSLD tables in memory.
     """
-    if not PICKLE_PATH.exists():
+    if not DB_PATH.exists():
         raise FileNotFoundError(
-            f"DSLD pickle not found at {PICKLE_PATH}. "
-            "Please generate dsld_tables.pkl before running the app."
+            f"DSLD database not found at {DB_PATH}. "
+            'Run python "other scripts/build_dsld_database.py" to build it.'
         )
+    return duckdb.connect(
+        str(DB_PATH), read_only=True, config={"memory_limit": "256MB", "threads": 2}
+    )
 
-    with open(PICKLE_PATH, "rb") as f:
-        tables = pickle.load(f)
 
-    for name in ["productOverview", "companyInformation", "dietarySupplementFacts", "otherIngredients"]:
-        tables[name]["DSLD ID"] = tables[name]["DSLD ID"].astype(str)
+def query(sql, params=None):
+    """
+    Runs a query and returns a DataFrame. Each call uses its own cursor,
+    because Streamlit runs sessions on separate threads.
+    """
+    return get_connection().cursor().execute(sql, params or []).df()
 
-    product_df = tables["productOverview"]
-    product_df["Bar Code"] = product_df["Bar Code"].fillna("").astype(str).str.strip()
-    product_df["Bar Code (normalized)"] = product_df["Bar Code"].map(normalize_barcode)
 
-    return tables
+def get_product(product_id):
+    """
+    The product's overview row as a Series, or None.
+    """
+    df = query('SELECT * FROM products WHERE "DSLD ID" = ?', [product_id])
+    return None if df.empty else df.iloc[0]
+
+
+def get_product_by_barcode(barcode_digits):
+    """
+    The first product whose normalized barcode matches, or None.
+    """
+    df = query(
+        'SELECT * FROM products WHERE "Bar Code (normalized)" = ? ORDER BY "DSLD ID" LIMIT 1',
+        [barcode_digits],
+    )
+    return None if df.empty else df.iloc[0]
+
+
+@st.cache_data(show_spinner=False)
+def list_values(column):
+    """
+    Sorted distinct values of a products column, for filter dropdowns.
+    """
+    df = query(
+        f'SELECT DISTINCT "{column}" AS v FROM products WHERE "{column}" IS NOT NULL ORDER BY v'
+    )
+    return df["v"].tolist()
+
+
+def search_products(name="", brand=None, form=None, limit=SEARCH_LIMIT):
+    """
+    Products whose name contains `name` (case-insensitive), optionally
+    filtered by brand and supplement form.
+    """
+    conditions, params = [], []
+    if name:
+        conditions.append('contains(lower("Product Name"), lower(?))')
+        params.append(name)
+    if brand:
+        conditions.append('"Brand Name" = ?')
+        params.append(brand)
+    if form:
+        conditions.append(f'"{FORM_COL}" = ?')
+        params.append(form)
+
+    where = " AND ".join(conditions) or "TRUE"
+    return query(
+        f'SELECT "DSLD ID", "Product Name", "Brand Name" FROM products '
+        f'WHERE {where} ORDER BY "Product Name" LIMIT {int(limit)}',
+        params,
+    )
 
 
 # ---------------------------------------------------------
@@ -87,12 +152,20 @@ def extract_overview_fields(row):
 # ---------------------------------------------------------
 # FACTSHEET EXTRACTION
 # ---------------------------------------------------------
-def extract_factsheet_fields(facts_df, product_id):
+def get_supplement_facts(product_id):
+    """
+    The product's Supplement Facts rows, in label order.
+    """
+    return query(
+        'SELECT * FROM supplement_facts WHERE "DSLD ID" = ? ORDER BY "Row Order"', [product_id]
+    )
+
+
+def extract_factsheet_fields(subset):
     """
     Pulls Ingredients, Ingredient Categories, and Daily Value Target Group
-    from the DietarySupplementFacts table.
+    from the product's Supplement Facts rows.
     """
-    subset = facts_df[facts_df["DSLD ID"] == product_id]
 
     if subset.empty:
         return {}
@@ -108,12 +181,11 @@ def extract_factsheet_fields(facts_df, product_id):
     }
 
 
-def build_supplement_facts_table(facts_df, product_id):
+def build_supplement_facts_table(subset):
     """
     Returns the label's Supplement Facts rows: ingredient, amount per serving
     and % Daily Value, in label order.
     """
-    subset = facts_df[facts_df["DSLD ID"] == product_id]
 
     if subset.empty:
         return pd.DataFrame()
@@ -139,11 +211,13 @@ def build_supplement_facts_table(facts_df, product_id):
 # ---------------------------------------------------------
 # OTHER INGREDIENTS EXTRACTION
 # ---------------------------------------------------------
-def extract_other_ingredients(other_df, product_id):
+def extract_other_ingredients(product_id):
     """
-    Pulls Other Ingredients from the OtherIngredients table.
+    Pulls Other Ingredients from the other_ingredients table.
     """
-    subset = other_df[other_df["DSLD ID"] == product_id]
+    subset = query(
+        'SELECT "Other Ingredients" FROM other_ingredients WHERE "DSLD ID" = ?', [product_id]
+    )
 
     if subset.empty:
         return None
@@ -164,12 +238,16 @@ def normalize_bool(val):
     return False
 
 
-def extract_brand_fields(df, product_id):
+def extract_brand_fields(product_id):
     """
     Extracts company name + boolean role flags for a given DSLD ID.
     """
     # A product can have several company rows, and some have no name
-    subset = df[df["DSLD ID"] == product_id].dropna(subset=["Company Name"])
+    subset = query(
+        'SELECT * FROM companies WHERE "DSLD ID" = ? AND "Company Name" IS NOT NULL '
+        'ORDER BY "Row Order"',
+        [product_id],
+    )
 
     if subset.empty:
         return None
@@ -200,46 +278,50 @@ def name_tokens(name):
     return set(re.sub(r"[^a-z0-9 ]", " ", name.lower()).split())
 
 
-def find_related_products(product_df, company_info_df, facts_df, product_id, on_market_only=False):
+def find_related_products(product_id, on_market_only=False):
     """
     Returns up to 5 related products from the same company or companies, ranked by how
     many ingredients they share with the current product (Jaccard overlap),
     with shared words in the product name as a tie-breaker.
     """
 
-    # Company names on this product (a product can list several companies)
-    company_names = set(
-        company_info_df.loc[company_info_df["DSLD ID"] == product_id, "Company Name"].dropna()
+    # All other products from the companies on this product
+    # (a product can list several companies)
+    market_filter = "AND trim(p.\"Market Status\") = 'On Market'" if on_market_only else ""
+    candidates = query(
+        f"""
+        WITH names AS (
+            SELECT DISTINCT "Company Name" FROM companies
+            WHERE "DSLD ID" = $id AND "Company Name" IS NOT NULL
+        )
+        SELECT p."DSLD ID", p."Product Name"
+        FROM products p
+        WHERE p."DSLD ID" IN (
+            SELECT c."DSLD ID" FROM companies c JOIN names USING ("Company Name")
+        )
+        AND p."DSLD ID" <> $id {market_filter}
+        """,
+        {"id": product_id},
     )
-    if not company_names:
-        return []
-
-    # All other products from these companies
-    candidate_ids = set(
-        company_info_df.loc[company_info_df["Company Name"].isin(company_names), "DSLD ID"]
-    )
-    candidate_ids.discard(product_id)
-
-    candidates = product_df[product_df["DSLD ID"].isin(candidate_ids)]
-
-    if on_market_only:
-        candidates = candidates[candidates["Market Status"].str.strip() == "On Market"]
 
     if candidates.empty:
         return []
 
     # Ingredient sets for the current product and every candidate
-    facts = facts_df.loc[
-        facts_df["DSLD ID"].isin(set(candidates["DSLD ID"]) | {product_id}),
-        ["DSLD ID", "Ingredient"],
-    ].dropna()
-    ingredients = facts.groupby("DSLD ID")["Ingredient"].agg(
-        lambda s: set(s.str.strip().str.lower())
+    facts = query(
+        """
+        SELECT "DSLD ID", lower(trim("Ingredient")) AS ingredient
+        FROM supplement_facts
+        WHERE "Ingredient" IS NOT NULL
+          AND "DSLD ID" IN (SELECT unnest($ids))
+        """,
+        {"ids": candidates["DSLD ID"].tolist() + [product_id]},
     )
+    ingredients = facts.groupby("DSLD ID")["ingredient"].agg(set)
     current_ings = ingredients.get(product_id, set())
 
-    current_name = product_df.loc[product_df["DSLD ID"] == product_id, "Product Name"]
-    current_tokens = name_tokens(current_name.iloc[0] if not current_name.empty else "")
+    current = get_product(product_id)
+    current_tokens = name_tokens(current["Product Name"] if current is not None else "")
 
     def score(r):
         ings = ingredients.get(r["DSLD ID"], set())
@@ -249,7 +331,8 @@ def find_related_products(product_df, company_info_df, facts_df, product_id, on_
 
     candidates = candidates.copy()
     candidates["score"] = candidates.apply(score, axis=1)
-    candidates = candidates.sort_values("score", ascending=False).head(5)
+    # Ties go to the newest DSLD entry, so the list is stable between visits
+    candidates = candidates.sort_values(["score", "DSLD ID"], ascending=False).head(5)
 
     return [
         {

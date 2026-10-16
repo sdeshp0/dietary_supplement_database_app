@@ -68,7 +68,7 @@ dietary_supplement_database_app/
 │   ├── ingredient_helpers.py
 │
 ├── data/
-│   └── dsld_tables.pkl   (tracked via Git LFS)
+│   └── dsld.duckdb   (DSLD products, tracked via Git LFS)
 │
 ├── requirements.txt
 └── README.md
@@ -77,7 +77,13 @@ dietary_supplement_database_app/
 ---
 
 ## 📚 Data Sources
-Products come from the NIH Dietary Supplement Label Database (DSLD), https://dsld.od.nih.gov
+Products come from the NIH Dietary Supplement Label Database (DSLD), https://dsld.od.nih.gov,
+stored in `data/dsld.duckdb`. The app opens it read-only and queries one product
+at a time, so it never loads the full 2M-row label data into memory.
+
+To refresh it, download the full database as CSV from the DSLD site (https://dsld.od.nih.gov),
+unzip it into `data/raw_dsld/`, then run `python "other scripts/build_dsld_database.py"`
+and commit the new `data/dsld.duckdb`.
 
 Ingredient details (`data/compound_metadata.csv`) are built by
 `other scripts/compound_metadata_scraper.py` from the source mapped to each
@@ -99,6 +105,7 @@ that fails to fetch keeps its previous data.
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
+- DuckDB (label database)
 - Pandas (data processing)
 - PyMuPDF (PDF → image extraction)
 - ECharts via streamlit‑echarts (interactive network graph)

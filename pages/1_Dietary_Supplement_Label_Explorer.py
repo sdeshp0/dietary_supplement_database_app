@@ -2,7 +2,13 @@ import streamlit as st
 import pandas as pd
 
 from utils.dsld_helpers import (
-    load_dsld_tables,
+    FORM_COL,
+    get_product,
+    get_product_by_barcode,
+    get_supplement_facts,
+    list_values,
+    parse_dsld_id,
+    search_products,
     extract_overview_fields,
     extract_factsheet_fields,
     extract_other_ingredients,
@@ -33,23 +39,6 @@ st.caption(
 )
 
 # ---------------------------------------------------------
-# LOAD DATA
-# ---------------------------------------------------------
-tables = load_dsld_tables()
-
-product_df = tables["productOverview"]
-company_df = tables["companyInformation"]
-facts_df = tables["dietarySupplementFacts"]
-other_df = tables["otherIngredients"]
-
-# Identify supplement form column (DSLD calls it "Supplement Form [LanguaL]")
-FORM_COL = None
-for c in product_df.columns:
-    if c.lower().startswith(("supplement form", "dosage form")) or c.lower() == "form":
-        FORM_COL = c
-        break
-
-# ---------------------------------------------------------
 # READ QUERY PARAMS
 # ---------------------------------------------------------
 preselected_id = st.query_params.get("dsld_id")
@@ -73,10 +62,10 @@ product_name = None
 # 1) DEEP LINKING ALWAYS TAKES PRIORITY
 # ---------------------------------------------------------
 if preselected_id:
-    match = product_df[product_df["DSLD ID"] == preselected_id]
-    if not match.empty:
-        selected_product = match.iloc[0]
-        product_id = selected_product["DSLD ID"]
+    match = get_product(parse_dsld_id(preselected_id))
+    if match is not None:
+        selected_product = match
+        product_id = int(selected_product["DSLD ID"])
         product_name = selected_product.get("Product Name", "")
         st.sidebar.success(f"Loaded via link: {product_name}")
     else:
@@ -92,40 +81,28 @@ if lookup_mode == "Search":
 
     search_name = st.sidebar.text_input("Search by product name:", "")
 
-    brands = sorted(product_df["Brand Name"].dropna().unique())
-    brand_filter = st.sidebar.selectbox("Filter by brand:", ["All"] + brands)
-
-    if FORM_COL:
-        forms = sorted(product_df[FORM_COL].dropna().unique())
-        form_filter = st.sidebar.selectbox("Filter by supplement form:", ["All"] + forms)
-    else:
-        form_filter = "All"
-
-    # Apply filters
-    results = product_df.copy()
-
-    if search_name:
-        results = results[
-            results["Product Name"].str.contains(search_name, case=False, na=False)
-        ]
-
-    if brand_filter != "All":
-        results = results[results["Brand Name"] == brand_filter]
-
-    if form_filter != "All" and FORM_COL:
-        results = results[results[FORM_COL] == form_filter]
+    brand_filter = st.sidebar.selectbox("Filter by brand:", ["All"] + list_values("Brand Name"))
+    form_filter = st.sidebar.selectbox(
+        "Filter by supplement form:", ["All"] + list_values(FORM_COL)
+    )
 
     # Display results
     if search_name or brand_filter != "All" or form_filter != "All":
+        results = search_products(
+            name=search_name,
+            brand=None if brand_filter == "All" else brand_filter,
+            form=None if form_filter == "All" else form_filter,
+        )
+
         st.sidebar.markdown("### Results")
 
         if results.empty:
             st.sidebar.info("No products match your search.")
         else:
-            for _, row in results.head(50).iterrows():
+            for _, row in results.iterrows():
                 label = f"{row['Product Name']} ({row['Brand Name']})"
                 if st.sidebar.button(label, key=f"search_{row['DSLD ID']}"):
-                    st.query_params.dsld_id = row["DSLD ID"]
+                    st.query_params.dsld_id = str(row["DSLD ID"])
                     st.rerun()
 
 # ---------------------------------------------------------
@@ -142,12 +119,12 @@ if lookup_mode == "Barcode":
     if barcode_input and not barcode_digits:
         st.sidebar.warning("A barcode should contain digits.")
     elif barcode_digits:
-        match = product_df[product_df["Bar Code (normalized)"] == barcode_digits]
-        if match.empty:
+        match = get_product_by_barcode(barcode_digits)
+        if match is None:
             st.sidebar.warning("No product found for this barcode.")
         else:
-            selected_product = match.iloc[0]
-            product_id = selected_product["DSLD ID"]
+            selected_product = match
+            product_id = int(selected_product["DSLD ID"])
             product_name = selected_product.get("Product Name", "")
             st.sidebar.success(f"Found product: {product_name}")
 
@@ -172,13 +149,14 @@ with t1:
     overview_data = extract_overview_fields(selected_product)
 
     # Factsheet fields
-    facts_info = extract_factsheet_fields(facts_df, product_id)
+    facts_rows = get_supplement_facts(product_id)
+    facts_info = extract_factsheet_fields(facts_rows)
     for key, value in facts_info.items():
         if value:
             overview_data[key] = value
 
     # Other ingredients
-    other_ings = extract_other_ingredients(other_df, product_id)
+    other_ings = extract_other_ingredients(product_id)
     if other_ings:
         overview_data["Other Ingredients"] = other_ings
 
@@ -199,7 +177,7 @@ with t1:
 
     # Supplement Facts panel
     st.markdown("### Supplement Facts")
-    facts_table = build_supplement_facts_table(facts_df, product_id)
+    facts_table = build_supplement_facts_table(facts_rows)
     if facts_table.empty:
         st.info("No Supplement Facts data for this product.")
     else:
@@ -228,7 +206,7 @@ with t1:
 with t2:
     st.subheader("Brand / Company Information")
 
-    brand_info = extract_brand_fields(company_df, product_id)
+    brand_info = extract_brand_fields(product_id)
     if not brand_info:
         st.info("No company information available for this product.")
     else:
@@ -255,13 +233,7 @@ with t2:
             "Show only products currently on market", value=False
         )
 
-        related = find_related_products(
-            product_df=product_df,
-            company_info_df=company_df,
-            facts_df=facts_df,
-            product_id=product_id,
-            on_market_only=on_market_only,
-        )
+        related = find_related_products(product_id, on_market_only=on_market_only)
 
         if not related:
             st.info("No related products found for this company with current filters.")
@@ -278,5 +250,5 @@ with t2:
 
                 with col2:
                     if st.button("View", key=f"view_{item['DSLD ID']}"):
-                        st.query_params.dsld_id = item["DSLD ID"]
+                        st.query_params.dsld_id = str(item["DSLD ID"])
                         st.rerun()
