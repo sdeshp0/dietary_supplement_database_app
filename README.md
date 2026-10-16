@@ -107,6 +107,14 @@ spaces) to ontology compounds, so a product's Supplement Facts can link each
 ingredient to its details. Edit it by hand; `python "other scripts/ingredient_mapping_report.py"`
 checks it and lists the most common names it doesn't cover yet.
 
+`python "other scripts/suggest_ingredient_aliases.py"` finds variants of names
+already mapped (salts like "magnesium citrate", forms like "creatine hcl",
+"organic turmeric", probiotic strains) and writes them to
+`data/ingredient_alias_candidates.csv`. Safe rules are marked `approve = yes`;
+names that hold two compounds, such as "calcium ascorbate", are left blank for
+a person. Set `approve` to `yes` or `no` (correcting `suggested_compound` if
+needed), then run it with `--apply` to add the approved rows to the aliases file.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
