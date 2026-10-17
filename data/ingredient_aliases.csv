@@ -5,6 +5,8 @@ l-5-hydroxytryptophan,5-HTP
 alpha lipoic acid,Alpha-lipoic acid
 alpha-lipoic acid,Alpha-lipoic acid
 lipoic acid,Alpha-lipoic acid
+r-alpha lipoic acid,Alpha-lipoic acid
+r-alpha-lipoic acid,Alpha-lipoic acid
 amylase,Amylase
 amylase i,Amylase
 amylase ii,Amylase
@@ -115,11 +117,16 @@ calcium carbonate,Calcium
 calcium citrate,Calcium
 calcium complex,Calcium
 calcium gluconate,Calcium
+calcium glycerophosphate,Calcium
 calcium lactate,Calcium
 calcium malate,Calcium
 calcium orotate,Calcium
+calcium phosphate,Calcium
 calcium sulfate,Calcium
 calcium; natural,Calcium
+dibasic calcium phosphate,Calcium
+dicalcium phosphate,Calcium
+tricalcium phosphate,Calcium
 calcium d-glucarate,Calcium-D-glucarate
 calcium-d-glucarate,Calcium-D-glucarate
 choline,Choline
@@ -128,7 +135,9 @@ choline chloride,Choline
 choline citrate,Choline
 chromium,Chromium
 chromium amino acid chelate,Chromium
+chromium gtf,Chromium
 chromium picolinate,Chromium
+gtf chromium,Chromium
 cla,CLA
 cla complex,CLA
 conjugated linoleic acid,CLA
@@ -308,7 +317,10 @@ tulsi,Holy basil
 inositol,Inositol
 inositol powder,Inositol
 inositol; powder,Inositol
+iodide,Iodine
 iodine,Iodine
+potassium iodide,Iodine
+sodium iodide,Iodine
 elemental iron,Iron
 ferrous fumarate,Iron
 ferrous gluconate,Iron
@@ -317,9 +329,12 @@ iron,Iron
 iron complex,Iron
 iron; natural,Iron
 arginine,L-arginine
+arginine akg,L-arginine
+arginine alpha-ketoglutarate,L-arginine
 arginine complex,L-arginine
 arginine hydrochloride,L-arginine
 arginine nitrate,L-arginine
+arginine pyroglutamate,L-arginine
 l-arginine,L-arginine
 l-arginine hcl,L-arginine
 l-arginine hydrochloride,L-arginine
@@ -342,6 +357,7 @@ citrulline nitrate,L-citrulline
 citrulline; micronized,L-citrulline
 l-citrulline,L-citrulline
 l-citrulline aspartate,L-citrulline
+l-citrulline dl-malate,L-citrulline
 l-citrulline malate,L-citrulline
 l-citrulline malate extract,L-citrulline
 l-citrulline; fermented,L-citrulline
@@ -383,6 +399,7 @@ lipase,Lipase
 lipase i,Lipase
 lipase ii,Lipase
 lipase; fungal,Lipase
+dimagnesium phosphate,Magnesium
 elemental magnesium,Magnesium
 magnesium,Magnesium
 magnesium amino acid chelate,Magnesium
@@ -395,12 +412,14 @@ magnesium chloride,Magnesium
 magnesium citrate,Magnesium
 magnesium complex,Magnesium
 magnesium gluconate,Magnesium
+magnesium glycerophosphate,Magnesium
 magnesium glycinate,Magnesium
 magnesium hydroxide,Magnesium
 magnesium lysinate glycinate chelate,Magnesium
 magnesium malate,Magnesium
 magnesium orotate,Magnesium
 magnesium oxide,Magnesium
+magnesium phosphate,Magnesium
 magnesium succinate,Magnesium
 magnesium sulfate,Magnesium
 magnesium taurate,Magnesium
@@ -431,6 +450,8 @@ nicotinamide mononucleotide,NAD+ precursors
 nicotinamide riboside,NAD+ precursors
 nicotinamide riboside chloride,NAD+ precursors
 nmn,NAD+ precursors
+inositol hexanicotinate,Niacin
+inositol nicotinate,Niacin
 niacin,Niacin
 niacinamide,Niacin
 nicotinamide,Niacin
@@ -441,6 +462,7 @@ concentrated fish oil,Omega-3
 dha/epa,Omega-3
 dha; epa,Omega-3
 eicosapentaenoic acid,Omega-3
+eicosapentaenoic acid ethyl ester,Omega-3
 epa,Omega-3
 epa/dha,Omega-3
 fish body oil,Omega-3
@@ -454,6 +476,7 @@ omega-3,Omega-3
 omega-3 concentrate,Omega-3
 omega-3 dha,Omega-3
 omega-3 fatty acids,Omega-3
+omega-3 fish oil,Omega-3
 purified fish oil,Omega-3
 total dha; epa,Omega-3
 total epa & dha,Omega-3
@@ -463,6 +486,7 @@ total epa/dha,Omega-3
 total omega-3 fatty acids,Omega-3
 dha,Omega-3 (DHA)
 docosahexaenoic acid,Omega-3 (DHA)
+docosahexaenoic acid ethyl ester,Omega-3 (DHA)
 oil of oregano,Oregano oil
 oregano leaf oil,Oregano oil
 oregano oil,Oregano oil
@@ -1063,6 +1087,7 @@ vitamin a palmitate,Vitamin A
 ascorbic acid,Vitamin C
 l-ascorbic acid,Vitamin C
 organic vitamin c,Vitamin C
+sodium ascorbate,Vitamin C
 vitamin c,Vitamin C
 vitamin c complex,Vitamin C
 vitamin c; natural,Vitamin C

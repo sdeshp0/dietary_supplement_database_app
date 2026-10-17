@@ -50,6 +50,12 @@ ANCHORS_PER_COMPOUND = 5
 
 # Charge words GSRS adds to ions: "MAGNESIUM CATION" is the same moiety as "MAGNESIUM"
 ION_WORDS = re.compile(r"\b(CATION|ANION|ION)\b|\([+-]?\d*[+-]?\)")
+# Ion names for an element: "CHROMIC CATION" is chromium
+ION_ELEMENTS = {
+    "CHROMIC": "CHROMIUM", "CHROMOUS": "CHROMIUM", "CUPRIC": "COPPER", "CUPROUS": "COPPER",
+    "FERRIC": "IRON", "FERROUS": "IRON", "MANGANOUS": "MANGANESE", "MANGANIC": "MANGANESE",
+    "IODIDE": "IODINE", "SELENITE": "SELENIUM", "SELENATE": "SELENIUM",
+}
 
 session = requests.Session()
 session.headers.update(HEADERS)
@@ -103,7 +109,8 @@ def lookup(dsld_name):
 
 
 def normalize_moiety(moiety):
-    return " ".join(ION_WORDS.sub(" ", moiety.upper()).split())
+    moiety = " ".join(ION_WORDS.sub(" ", moiety.upper()).split())
+    return ION_ELEMENTS.get(moiety, moiety)
 
 
 def lookup_all(names):
@@ -146,6 +153,11 @@ def moiety_set(record):
     return {normalize_moiety(m) for m in record["moieties"]}
 
 
+def lists_moiety(record):
+    """False when GSRS gives no active moiety, so the substance stands for itself."""
+    return record["moieties"] != [record["name"]]
+
+
 def main():
     aliases = pd.read_csv(ALIASES_CSV, dtype=str)
     aliases = aliases[aliases["compound"] != "Probiotics"]
@@ -155,11 +167,16 @@ def main():
     results = lookup_all(sorted(set(aliases["dsld_name"]) | set(candidates["dsld_name"])))
     products = product_counts()
 
-    # Each compound's names that GSRS knows as chemicals, most common first
+    # Each compound's names that GSRS knows as a chemical with one moiety, most
+    # common first. Salts with two moieties are left out: calcium pantothenate
+    # would otherwise make every calcium salt match B5.
     aliases["products"] = aliases["dsld_name"].map(products).fillna(0)
     anchors = {}
     for compound, group in aliases.sort_values("products", ascending=False).groupby("compound"):
-        anchors[compound] = [n for n in group["dsld_name"] if is_chemical(results.get(n))]
+        anchors[compound] = [
+            n for n in group["dsld_name"]
+            if is_chemical(results.get(n)) and len(moiety_set(results[n])) == 1
+        ]
 
     def reference(compound, dsld_name):
         """What the compound should match: the moieties of its most common
@@ -186,6 +203,8 @@ def main():
             verdict = "no reference for compound"
         elif reference(compound, dsld_name) & moiety_set(record):
             verdict = "agrees"
+        elif not lists_moiety(record):
+            verdict = "no active moiety in GSRS"
         else:
             verdict = "differs"
         rows.append({
