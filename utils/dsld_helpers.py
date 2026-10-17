@@ -6,6 +6,8 @@ import requests
 import streamlit as st
 import fitz  # PyMuPDF
 
+from utils.dose import compare_dose
+
 
 # ---------------------------------------------------------
 # PATHS
@@ -213,7 +215,8 @@ def extract_factsheet_fields(subset):
 def build_supplement_facts_table(subset):
     """
     Returns the label's Supplement Facts rows: ingredient, amount per serving,
-    % Daily Value and the ontology compound it maps to (or None), in label order.
+    % Daily Value, how the amount compares with the adult RDA and upper limit,
+    and the ontology compound it maps to (or None), in label order.
     """
 
     if subset.empty:
@@ -230,11 +233,22 @@ def build_supplement_facts_table(subset):
         ~daily_value.str.fullmatch(r"<?[\d.]+"), daily_value + "%"
     )
 
+    compounds = subset["Ingredient"].map(match_compound)
+    comparisons = [
+        compare_dose(compound, ingredient, amt, unit)
+        for compound, ingredient, amt, unit in zip(
+            compounds, subset["Ingredient"], subset["Amount Per Serving"],
+            subset["Amount Per Serving Unit"],
+        )
+    ]
+
     return pd.DataFrame({
         "Ingredient": subset["Ingredient"].fillna("").values,
         "Amount per serving": amount.values,
         "% Daily Value": daily_value.values,
-        "Compound": subset["Ingredient"].map(match_compound).values,
+        "% of adult RDA": [c.percent_of_rda if c else "" for c in comparisons],
+        "Upper limit": [c.upper_limit if c else "" for c in comparisons],
+        "Compound": compounds.values,
     })
 
 

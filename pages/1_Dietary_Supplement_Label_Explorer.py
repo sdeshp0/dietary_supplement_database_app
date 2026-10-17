@@ -186,6 +186,13 @@ with t1:
         serving = overview_data.get("Serving Size")
         if serving:
             st.caption(f"Per serving: {serving}")
+        if facts_table[["% of adult RDA", "Upper limit"]].ne("").any(axis=None):
+            st.caption(
+                "RDA and upper limit are NIH Office of Dietary Supplements values for "
+                "adults 19 and older, not pregnant or breastfeeding. A range covers the "
+                "differences between men and women and between age groups. The "
+                "comparison is for one serving; check the label for servings per day."
+            )
         # Link each ingredient that maps to an ontology compound to its
         # entry in the Ingredient Metadata Explorer
         facts_table["Compound"] = facts_table["Compound"].map(
@@ -196,6 +203,15 @@ with t1:
             hide_index=True,
             width="stretch",
             column_config={
+                "% of adult RDA": st.column_config.TextColumn(
+                    help="Amount per serving as a share of the recommended amount for adults",
+                ),
+                "Upper limit": st.column_config.TextColumn(
+                    help="Whether one serving goes over the adult tolerable upper intake level. "
+                    "\"Salt weight\": a mineral named as a salt, such as magnesium citrate, "
+                    "may list the weight of the whole salt, so it isn't compared.",
+                    width="medium",
+                ),
                 "Compound": st.column_config.LinkColumn(
                     "Ingredient details",
                     help="Opens this ingredient in the Ingredient Metadata Explorer",
