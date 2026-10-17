@@ -18,6 +18,7 @@ import pandas as pd
 from utils.units import FOLIC_ACID_DFE_FACTOR, Amount, normalize_amount, target_unit
 
 METADATA_CSV = Path(__file__).parents[1] / "data" / "compound_metadata.csv"
+CEILINGS_CSV = Path(__file__).parents[1] / "data" / "dose_ceilings.csv"
 
 # The ODS "recommended amount" for omega-3 is for ALA, which says nothing
 # about fish oil, EPA or DHA, so those compounds aren't compared
@@ -37,9 +38,11 @@ SALT_NAME = re.compile(
     re.IGNORECASE,
 )
 
-# An amount this many times the highest adult UL is almost certainly a unit
-# mistake on the label (vitamin D entered as 1,000 mg instead of IU)
+# An amount this many times the highest adult UL, or this many times the 99th
+# percentile of DSLD labels (data/dose_ceilings.csv), is almost certainly a
+# unit mistake on the label (vitamin D entered as 1,000 mg instead of IU)
 IMPLAUSIBLE_TIMES_UL = 100
+IMPLAUSIBLE_TIMES_P99 = 5
 
 AMOUNT = re.compile(r"([\d,]*\.?\d+)\s*(?:[–-]\s*([\d,]*\.?\d+))?\s*(mcg|mg|g)\b")
 
@@ -99,6 +102,23 @@ def _metadata():
     return pd.read_csv(METADATA_CSV).set_index("compound")
 
 
+@lru_cache(maxsize=1)
+def _ceilings():
+    if not CEILINGS_CSV.exists():
+        return {}
+    ceilings = pd.read_csv(CEILINGS_CSV)
+    return dict(zip(ceilings["compound"], ceilings["p99"]))
+
+
+def looks_like_unit_error(compound, dose):
+    """True when an amount (in the compound's unit) is far beyond any real label."""
+    reference = adult_reference(compound)
+    if reference and reference.ul and dose > IMPLAUSIBLE_TIMES_UL * reference.ul[1]:
+        return True
+    p99 = _ceilings().get(compound)
+    return bool(p99) and dose > IMPLAUSIBLE_TIMES_P99 * p99
+
+
 @lru_cache(maxsize=None)
 def adult_reference(compound):
     """The compound's adult RDA and UL ranges in its target unit, or None."""
@@ -145,7 +165,7 @@ def compare_dose(compound, ingredient, amount, unit):
     if not isinstance(dose, Amount) or dose.unit != reference.unit:
         return None
 
-    if reference.ul and dose.value > IMPLAUSIBLE_TIMES_UL * reference.ul[1]:
+    if looks_like_unit_error(compound, dose.value):
         return Comparison("", "Check label (unit error?)")
 
     percent = ""
@@ -165,3 +185,21 @@ def compare_dose(compound, ingredient, amount, unit):
         percent = f"{percent} (estimate)" if percent else percent
         status = f"{status} (estimate)" if status else status
     return Comparison(percent, status)
+
+
+def comparable_dose(compound, ingredient, amount, unit):
+    """
+    The label amount in the compound's target unit, for sorting products by
+    dose, or None when it isn't comparable: a mineral named as a salt, a unit
+    that doesn't convert (CFU, mL), or an amount that looks like a unit error.
+    """
+    if not isinstance(compound, str):
+        return None
+    if compound in MINERALS and SALT_NAME.search(ingredient or ""):
+        return None
+    dose = normalize_amount(amount, unit, compound, ingredient)
+    if dose is None or dose.unit != target_unit(compound):
+        return None
+    if looks_like_unit_error(compound, dose.value):
+        return None
+    return dose

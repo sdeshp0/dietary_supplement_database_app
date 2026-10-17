@@ -6,7 +6,8 @@ import requests
 import streamlit as st
 import fitz  # PyMuPDF
 
-from utils.dose import compare_dose
+from utils.dose import comparable_dose, compare_dose
+from utils.units import target_unit
 
 
 # ---------------------------------------------------------
@@ -149,6 +150,64 @@ def match_compound(name):
     The ontology compound a DSLD ingredient name maps to, or None.
     """
     return load_ingredient_aliases().get(normalize_ingredient_name(name))
+
+
+@st.cache_data(show_spinner="Finding products…", max_entries=20)
+def products_with_compound(compound):
+    """
+    One row per product whose Supplement Facts list the compound under any of
+    its aliases: the label's name and amount, the dose in the compound's unit
+    (for sorting; empty when not comparable) and how it compares with the
+    adult RDA and upper limit. Where a product lists the compound more than
+    once (folate and folic acid), the row with the highest dose is kept.
+    """
+    names = [n for n, c in load_ingredient_aliases().items() if c == compound]
+    if not names:
+        return pd.DataFrame()
+    rows = query(
+        """
+        SELECT f."DSLD ID", p."Product Name", p."Brand Name", p."Market Status",
+               f."Ingredient", f."Amount Per Serving", f."Amount Per Serving Unit"
+        FROM supplement_facts f
+        JOIN products p USING ("DSLD ID")
+        WHERE lower(trim(regexp_replace(f."Ingredient", '\\s+', ' ', 'g'))) IN (SELECT unnest(?))
+        """,
+        [names],
+    )
+    if rows.empty:
+        return rows
+
+    doses, percents, limits = [], [], []
+    for ingredient, amount, unit in zip(
+        rows["Ingredient"], rows["Amount Per Serving"], rows["Amount Per Serving Unit"]
+    ):
+        dose = comparable_dose(compound, ingredient, amount, unit)
+        comparison = compare_dose(compound, ingredient, amount, unit)
+        doses.append(dose.value if dose else None)
+        percents.append(comparison.percent_of_rda if comparison else "")
+        limits.append(comparison.upper_limit if comparison else "")
+
+    label_amount = (
+        rows["Amount Per Serving"].fillna("").str.strip()
+        + " " + rows["Amount Per Serving Unit"].fillna("").str.strip()
+    ).str.strip()
+    result = pd.DataFrame({
+        "DSLD ID": rows["DSLD ID"],
+        "Product": rows["Product Name"],
+        "Brand": rows["Brand Name"],
+        "Market Status": rows["Market Status"],
+        "Listed as": rows["Ingredient"],
+        "Label amount": label_amount,
+        "Dose": pd.to_numeric(pd.Series(doses, dtype="float64")),
+        "% of adult RDA": percents,
+        "Upper limit": limits,
+    })
+    result = result.sort_values("Dose", ascending=False, na_position="last")
+    return result.drop_duplicates("DSLD ID").reset_index(drop=True)
+
+
+def dose_unit(compound):
+    return target_unit(compound)
 
 
 # ---------------------------------------------------------

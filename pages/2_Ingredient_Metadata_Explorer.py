@@ -1,6 +1,10 @@
+from urllib.parse import quote
+
 import streamlit as st
 import pandas as pd
 from streamlit_echarts import st_echarts
+
+from utils.dsld_helpers import dose_unit, products_with_compound
 
 
 from utils.ingredient_helpers import (
@@ -282,3 +286,66 @@ with tab_rda:
 
     if rda or ul:
         st.caption("Values from NIH ODS fact sheets.")
+
+# ---------------------------------------------------------
+# PRODUCTS WITH THIS COMPOUND
+# ---------------------------------------------------------
+PRODUCT_LIMIT = 100
+
+st.markdown(f"### Products with {selected}")
+products = products_with_compound(selected)
+if products.empty:
+    st.info("No products in the label database list this ingredient under a name we recognise yet.")
+else:
+    col_market, col_sort = st.columns(2)
+    with col_market:
+        on_market = st.checkbox("On the market only", value=True)
+    with col_sort:
+        sort_by = st.radio(
+            "Sort by", ["Highest dose", "Lowest dose", "Product name"], horizontal=True
+        )
+
+    shown = products[products["Market Status"] == "On Market"] if on_market else products
+    if sort_by == "Lowest dose":
+        shown = shown.sort_values("Dose", ascending=True, na_position="last")
+    elif sort_by == "Product name":
+        shown = shown.sort_values("Product", key=lambda s: s.str.lower())
+    total = len(shown)
+    shown = shown.head(PRODUCT_LIMIT).copy()
+
+    unit = dose_unit(selected)
+    st.caption(
+        f"Showing {len(shown):,} of {total:,} products. Dose is the amount per serving "
+        f"in {unit}; it is left blank when the label's unit doesn't convert, when a "
+        "mineral is named as a salt (the amount may be the whole salt), or when the "
+        "amount looks like a unit error on the label. Label data comes from the NIH DSLD "
+        "and can contain entry errors, so check the label before relying on a number."
+    )
+    shown["Label"] = shown["DSLD ID"].map(
+        lambda i: f"Dietary_Supplement_Label_Explorer?dsld_id={quote(str(i))}"
+    )
+    columns = ["Label", "Product", "Brand", "Listed as", "Label amount", "Dose",
+               "% of adult RDA", "Upper limit"]
+    if not on_market:
+        columns.insert(3, "Market Status")
+    if not (shown["% of adult RDA"].ne("").any() or shown["Upper limit"].ne("").any()):
+        columns = [c for c in columns if c not in ("% of adult RDA", "Upper limit")]
+    st.dataframe(
+        shown[columns],
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Label": st.column_config.LinkColumn(
+                "Label", help="Opens the product in the Label Explorer", display_text="Open",
+                width="small",
+            ),
+            "Product": st.column_config.TextColumn(width="medium"),
+            "Dose": st.column_config.NumberColumn(f"Dose ({unit})", format="localized"),
+            "% of adult RDA": st.column_config.TextColumn(
+                help="Amount per serving as a share of the NIH recommended amount for adults 19+",
+            ),
+            "Upper limit": st.column_config.TextColumn(
+                help="Whether one serving goes over the NIH upper limit for adults 19+",
+            ),
+        },
+    )
