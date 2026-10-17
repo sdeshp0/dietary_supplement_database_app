@@ -6,6 +6,7 @@ Usage:
     python "other scripts/ingredient_mapping_report.py" [number of names to list]
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -16,6 +17,14 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from utils.units import normalize_amount, target_unit  # noqa: E402
 
 DATA_DIR = Path(__file__).parents[1] / "data"
+
+# Nutrition Facts lines that some labels repeat in their Supplement Facts.
+# They aren't supplement ingredients, so coverage is also given without them.
+NUTRITION_FACTS = re.compile(
+    r"^(calories|calories from fat|total carbohydrates?|total fat|"
+    r"(saturated|trans|polyunsaturated|monounsaturated) fat|cholesterol|"
+    r"sugars?|total sugars|added sugars|protein)$"
+)
 
 
 def main(top_n=50):
@@ -47,6 +56,10 @@ def main(top_n=50):
     print(f"Mapped {mapped.sum():,} of {len(names):,} distinct ingredient names, "
           f"covering {names.loc[mapped, 'label_rows'].sum() / names['label_rows'].sum():.1%} "
           "of Supplement Facts rows.")
+    ingredients = ~names["name"].str.match(NUTRITION_FACTS)
+    print(f"Leaving out Nutrition Facts lines (calories, fat, sugar, protein), "
+          f"{names.loc[mapped, 'label_rows'].sum() / names.loc[ingredients, 'label_rows'].sum():.1%} "
+          "of ingredient rows.")
     print(f"Compounds with at least one alias: {aliases['compound'].nunique()} of {len(ontology)}")
 
     # How many linked rows have an amount in the unit their compound is compared in
@@ -65,7 +78,7 @@ def main(top_n=50):
           f"{in_target / max(len(with_amount), 1):.1%} of them convert to the compound's unit.")
 
     print(f"\nMost common unmapped names (top {top_n} by product count):")
-    missing = names[~mapped].sort_values("products", ascending=False).head(top_n)
+    missing = names[~mapped & ingredients].sort_values("products", ascending=False).head(top_n)
     for r in missing.itertuples():
         print(f"  {r.products:>7,}  {r.name}")
 

@@ -57,6 +57,20 @@ class NormalizeAmount(unittest.TestCase):
                           67, "mg", note=True)
         self.assertAmount(normalize_amount("15", "mg {alpha}-TE", "Vitamin E"), 15, "mg")
 
+    def test_beta_carotene(self):
+        self.assertAmount(normalize_amount("5000", "IU", "Vitamin A", "Beta-Carotene"),
+                          750, "mcg RAE")
+        self.assertAmount(normalize_amount("3", "mg", "Vitamin A", "Beta-Carotene"),
+                          1500, "mcg RAE", note=True)
+        self.assertAmount(normalize_amount("900", "mcg", "Vitamin A", "Beta-Carotene"),
+                          900, "mcg RAE", note=True)
+        self.assertAmount(normalize_amount("900", "mcg RAE", "Vitamin A", "Beta-Carotene"),
+                          900, "mcg RAE")
+
+    def test_vitamin_k_and_molybdenum_in_mcg(self):
+        self.assertAmount(normalize_amount("0.1", "mg", "Vitamin K", "Vitamin K1"), 100, "mcg")
+        self.assertAmount(normalize_amount("75", "mcg", "Molybdenum"), 75, "mcg")
+
     def test_folate(self):
         self.assertAmount(normalize_amount("400", "mcg DFE", "Folate"), 400, "mcg DFE")
         self.assertAmount(normalize_amount("400", "mcg", "Folate", "Folic Acid"), 680, "mcg DFE")

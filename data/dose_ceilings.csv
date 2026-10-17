@@ -30,7 +30,7 @@ DIM,mg,643,400.0
 EGCG,mg,3488,750.0
 Fiber,g,10631,11.0
 Fisetin,mg,64,1022.0
-Folate,mcg DFE,30387,8333.0
+Folate,mcg DFE,31551,8500.0
 GABA-related compounds,mg,1040,3000.0
 Garlic (allicin),mg,1766,2000.0
 Glycine,mg,2091,3512.2
@@ -51,10 +51,11 @@ Magnesium,mg,30145,700.0
 Magnesium threonate,mg,158,2085.0
 Manganese,mg,16256,20.0
 Melatonin,mg,2701,20.0
+Molybdenum,mcg,10307,600.0
 Myo-inositol,mg,165,4000.0
 NAC,mg,2307,1200.0
 NAD+ precursors,mg,210,1000.0
-Niacin,mg,25685,500.0
+Niacin,mg,26050,500.0
 Omega-3,g,15445,4.5
 Omega-3 (DHA),g,8115,1.16
 Oregano oil,mg,166,510.0
@@ -82,11 +83,12 @@ Spermidine,mg,8,10.0
 Taurine,mg,4378,3000.0
 Tryptophan,mg,1060,1500.0
 Tyrosine,mg,3074,3000.0
-Vitamin A,mcg RAE,23232,7500.0
+Vitamin A,mcg RAE,24336,7500.0
 Vitamin C,mg,38062,1800.0
 Vitamin D,mcg,29214,250.0
 Vitamin E,mg,25247,536.0
-Vitamin K2,mcg,3115,10000.0
+Vitamin K,mcg,8164,2600.0
+Vitamin K2,mcg,3325,15000.0
 Whey protein,mg,492,47700.0
 White kidney bean extract,mg,133,4668.8
 Zinc,mg,27575,50.0

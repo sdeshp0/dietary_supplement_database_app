@@ -22,7 +22,9 @@ TARGET_UNITS = {
     "Chromium": "mcg",
     "Copper": "mcg",
     "Iodine": "mcg",
+    "Molybdenum": "mcg",
     "Selenium": "mcg",
+    "Vitamin K": "mcg",
     "Vitamin K2": "mcg",
     "Omega-3": "g",
     "Omega-3 (DHA)": "g",
@@ -49,6 +51,8 @@ BASIS_UNIT = re.compile(r"^(ng|mcg|ug|mg|g)\s+(dfe|rae|re|ne|\{alpha\}-te)$")
 # IU conversions from the ODS fact sheets
 VITAMIN_D_MCG_PER_IU = 0.025
 VITAMIN_A_RAE_MCG_PER_IU = 0.3       # retinol and its esters
+BETA_CAROTENE_RAE_MCG_PER_IU = 0.15  # beta-carotene from supplements
+BETA_CAROTENE_RAE_PER_MCG = 0.5
 VITAMIN_E_MG_PER_IU_NATURAL = 0.67   # d-alpha-tocopherol
 VITAMIN_E_MG_PER_IU_SYNTHETIC = 0.45 # dl-alpha-tocopherol
 # A label's folic acid counts 1.7 times in mcg DFE
@@ -66,6 +70,10 @@ def target_unit(compound):
     return TARGET_UNITS.get(compound, "mg")
 
 
+def is_beta_carotene(ingredient):
+    return "carotene" in (ingredient or "").lower()
+
+
 def parse_amount(text):
     """The label amount as a number, or None for blanks and "<1"-style amounts."""
     if text is None:
@@ -81,6 +89,8 @@ def _iu_to_target(value, compound, ingredient):
     name = (ingredient or "").lower()
     if compound == "Vitamin D":
         return Amount(value * VITAMIN_D_MCG_PER_IU, "mcg")
+    if compound == "Vitamin A" and is_beta_carotene(name):
+        return Amount(value * BETA_CAROTENE_RAE_MCG_PER_IU, "mcg RAE")
     if compound == "Vitamin A":
         return Amount(value * VITAMIN_A_RAE_MCG_PER_IU, "mcg RAE",
                       None if "retin" in name else "assumes retinol, not beta-carotene")
@@ -129,6 +139,16 @@ def normalize_amount(amount, unit, compound, ingredient=""):
         mcg *= FOLIC_ACID_DFE_FACTOR
         if "folic" not in (ingredient or "").lower():
             note = "assumes the amount is folic acid"
+    if target == "mcg RAE" and basis != "rae" and is_beta_carotene(ingredient):
+        # Labels give beta-carotene either as its own weight or already in
+        # mcg RAE. Amounts in mg are almost always its weight (2 mcg of
+        # supplement beta-carotene is 1 mcg RAE); amounts in mcg are mostly
+        # RAE (450, 900). Both are estimates.
+        if key in ("mg", "g", "gram(s)", "grams"):
+            mcg *= BETA_CAROTENE_RAE_PER_MCG
+            note = "assumes the amount is the weight of beta-carotene"
+        else:
+            note = "assumes the amount is in mcg RAE"
 
     target_mass = target.split()[0]
     return Amount(mcg / MASS_UNITS[target_mass], target, note)

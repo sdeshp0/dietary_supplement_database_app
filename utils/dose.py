@@ -15,7 +15,8 @@ from typing import NamedTuple, Optional
 
 import pandas as pd
 
-from utils.units import FOLIC_ACID_DFE_FACTOR, Amount, normalize_amount, target_unit
+from utils.units import (FOLIC_ACID_DFE_FACTOR, Amount, is_beta_carotene, normalize_amount,
+                         target_unit)
 
 METADATA_CSV = Path(__file__).parents[1] / "data" / "compound_metadata.csv"
 CEILINGS_CSV = Path(__file__).parents[1] / "data" / "dose_ceilings.csv"
@@ -26,7 +27,7 @@ NO_COMPARISON = {"Omega-3", "Omega-3 (DHA)"}
 
 MINERALS = {
     "Calcium", "Magnesium", "Zinc", "Iron", "Copper", "Manganese", "Chromium",
-    "Selenium", "Potassium", "Iodine", "Boron", "Phosphorus",
+    "Selenium", "Potassium", "Iodine", "Boron", "Phosphorus", "Molybdenum",
 }
 # A mineral named as a salt ("Magnesium Citrate 500 mg") often gives the
 # weight of the whole salt, not the mineral, so it isn't compared
@@ -34,7 +35,7 @@ SALT_NAME = re.compile(
     r"\b(citrate|oxide|glycinate|bisglycinate|malate|carbonate|gluconate|picolinate|"
     r"aspartate|chloride|sulfate|sulphate|chelate|orotate|taurate|lactate|hydroxide|"
     r"succinate|fumarate|phosphate|glycerophosphate|iodide|selenite|selenate|"
-    r"methionine|bicarbonate|nicotinate|polynicotinate|acetate)\b",
+    r"methionine|bicarbonate|nicotinate|polynicotinate|acetate|molybdate)\b",
     re.IGNORECASE,
 )
 
@@ -174,7 +175,9 @@ def compare_dose(compound, ingredient, amount, unit):
         percent = _format_range(100 * dose.value / high, 100 * dose.value / low, "%")
 
     status = ""
-    if reference.ul:
+    # The vitamin A upper limit is for preformed vitamin A (retinol), not
+    # beta-carotene
+    if reference.ul and not (compound == "Vitamin A" and is_beta_carotene(ingredient)):
         low, high = reference.ul
         if dose.value > high:
             status = "Over the limit"
