@@ -129,6 +129,13 @@ including the ODS IU conversions for vitamins A, D and E. Where the label doesn'
 say which form it is (vitamin E in IU, vitamin A in IU, folate in mcg), the
 result carries a note naming the assumption. Tests: `python -m unittest discover tests`.
 
+`utils/dose.py` compares each linked ingredient's amount per serving with the
+ODS recommended amount and upper limit for adults 19 and older (pregnancy and
+breastfeeding left out), showing a range where men, women and age groups
+differ. Minerals named as a salt ("magnesium citrate") aren't compared, since
+the amount may be the whole salt, and amounts over 100 times the upper limit
+are flagged as a likely unit error on the label.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
