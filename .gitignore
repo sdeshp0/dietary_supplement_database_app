@@ -2,3 +2,4 @@ data/raw_dsld/
 *.duckdb.tmp
 *.duckdb.wal
 __pycache__/
+data/.gsrs_cache.json

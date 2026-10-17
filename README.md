@@ -107,6 +107,22 @@ spaces) to ontology compounds, so a product's Supplement Facts can link each
 ingredient to its details. Edit it by hand; `python "other scripts/ingredient_mapping_report.py"`
 checks it and lists the most common names it doesn't cover yet.
 
+`python "other scripts/suggest_ingredient_aliases.py"` finds variants of names
+already mapped (salts like "magnesium citrate", forms like "creatine hcl",
+"organic turmeric", probiotic strains) and writes them to
+`data/ingredient_alias_candidates.csv`. Safe rules are marked `approve = yes`;
+names that hold two compounds, such as "calcium ascorbate", are left blank for
+a person. Set `approve` to `yes` or `no` (correcting `suggested_compound` if
+needed), then run it with `--apply` to add the approved rows to the aliases file.
+
+`python "other scripts/check_aliases_gsrs.py"` checks the aliases against FDA's
+[Global Substance Registration System](https://gsrs.ncats.nih.gov), which records
+each substance's active moiety (magnesium citrate's is magnesium). It writes
+`data/ingredient_alias_gsrs_check.csv`, flagging aliases whose active moiety
+doesn't match their compound's, and lists which compounds each name on the
+review list matches. The first run makes about 2,600 requests to GSRS; replies
+are cached for later runs.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
