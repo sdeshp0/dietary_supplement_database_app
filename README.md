@@ -133,8 +133,14 @@ result carries a note naming the assumption. Tests: `python -m unittest discover
 ODS recommended amount and upper limit for adults 19 and older (pregnancy and
 breastfeeding left out), showing a range where men, women and age groups
 differ. Minerals named as a salt ("magnesium citrate") aren't compared, since
-the amount may be the whole salt, and amounts over 100 times the upper limit
-are flagged as a likely unit error on the label.
+the amount may be the whole salt. Amounts over 100 times the upper limit,
+or over 5 times the 99th percentile of
+DSLD labels for that compound (`data/dose_ceilings.csv`, from
+`python "other scripts/build_dose_ceilings.py"`), are flagged as a likely unit
+error on the label.
+
+The Ingredient Explorer lists the products that contain the selected
+ingredient, sortable by dose, with links back to each label.
 
 ## 🛠 Tech Stack
 - Python 3.10+
