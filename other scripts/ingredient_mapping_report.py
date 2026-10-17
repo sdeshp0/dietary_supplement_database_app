@@ -12,6 +12,9 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).parents[1]))
+from utils.units import normalize_amount, target_unit  # noqa: E402
+
 DATA_DIR = Path(__file__).parents[1] / "data"
 
 
@@ -45,6 +48,21 @@ def main(top_n=50):
           f"covering {names.loc[mapped, 'label_rows'].sum() / names['label_rows'].sum():.1%} "
           "of Supplement Facts rows.")
     print(f"Compounds with at least one alias: {aliases['compound'].nunique()} of {len(ontology)}")
+
+    # How many linked rows have an amount in the unit their compound is compared in
+    amounts = con.execute("""
+        SELECT a.compound, f."Ingredient", f."Amount Per Serving", f."Amount Per Serving Unit"
+        FROM supplement_facts f
+        JOIN aliases a
+          ON a.dsld_name = lower(trim(regexp_replace(f."Ingredient", '\\s+', ' ', 'g')))
+    """).fetchall()
+    converted = [normalize_amount(amt, unit, compound, ingredient)
+                 for compound, ingredient, amt, unit in amounts]
+    with_amount = [c for c in converted if c]
+    in_target = sum(c.unit == target_unit(compound)
+                    for c, (compound, *_) in zip(converted, amounts) if c)
+    print(f"Linked rows with an amount: {len(with_amount):,}; "
+          f"{in_target / max(len(with_amount), 1):.1%} of them convert to the compound's unit.")
 
     print(f"\nMost common unmapped names (top {top_n} by product count):")
     missing = names[~mapped].sort_values("products", ascending=False).head(top_n)

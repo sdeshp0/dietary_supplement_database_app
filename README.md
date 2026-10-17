@@ -123,6 +123,12 @@ doesn't match their compound's, and lists which compounds each name on the
 review list matches. The first run makes about 2,600 requests to GSRS; replies
 are cached for later runs.
 
+`utils/units.py` converts label amounts to the unit each compound's NIH ODS
+recommended amount uses (mg, mcg, g, mcg DFE for folate, mcg RAE for vitamin A),
+including the ODS IU conversions for vitamins A, D and E. Where the label doesn't
+say which form it is (vitamin E in IU, vitamin A in IU, folate in mcg), the
+result carries a note naming the assumption. Tests: `python -m unittest discover tests`.
+
 ## 🛠 Tech Stack
 - Python 3.10+
 - Streamlit (multi‑page app framework)
