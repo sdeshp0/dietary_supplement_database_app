@@ -3,12 +3,12 @@ from urllib.parse import quote
 import pandas as pd
 import streamlit as st
 
-from utils.dsld_helpers import search_products, stack_product
+from utils.dsld_helpers import stack_product
 from utils.stack import (MAX_SERVINGS, StackItem, format_stack, parse_stack,
                          stack_other_ingredients, stack_totals)
 from utils.stack_state import current_stack, remember_stack
 
-SEARCH_RESULTS = 20
+LABEL_EXPLORER = "pages/1_Dietary_Supplement_Label_Explorer.py"
 
 
 def details_link(compound):
@@ -64,26 +64,23 @@ remember_stack(stack)
 if stack and st.query_params.get("stack") != format_stack(stack):
     st.query_params["stack"] = format_stack(stack)
 
+
 # ---------------------------------------------------------
-# SIDEBAR: ADD A PRODUCT
+# ADD A PRODUCT: search in the Label Explorer, then "Add to stack" there
 # ---------------------------------------------------------
-st.sidebar.subheader("➕ Add a product")
-search_name = st.sidebar.text_input("Search by product name:", "")
-if search_name:
-    results = search_products(name=search_name, limit=SEARCH_RESULTS)
-    if results.empty:
-        st.sidebar.info("No products match your search.")
-    in_stack = {item.dsld_id for item in stack}
-    for _, row in results.iterrows():
-        dsld_id = int(row["DSLD ID"])
-        label = f"{row['Product Name']} ({row['Brand Name']})"
-        if dsld_id in in_stack:
-            st.sidebar.caption(f"✓ {label}")
-        elif st.sidebar.button(label, key=f"add_{dsld_id}"):
-            save_stack(stack + [StackItem(dsld_id, 1.0)])
+def add_product_link():
+    st.page_link(
+        LABEL_EXPLORER, label="Find a product to add in the Label Explorer", icon="➕",
+        help="Search by name, brand or barcode, open a product and click \"Add to stack\"",
+    )
+
 
 if not stack:
-    st.info("Search for a product in the sidebar to start your stack.")
+    st.info(
+        "Your stack is empty. Find a product in the Label Explorer and click "
+        "\"Add to stack\" to start one."
+    )
+    add_product_link()
     st.stop()
 
 # ---------------------------------------------------------
@@ -127,6 +124,7 @@ new_stack = [
 if new_stack != stack:
     save_stack(new_stack)
 
+add_product_link()
 st.caption("The link to this page keeps your stack, so you can bookmark or share it.")
 
 # ---------------------------------------------------------
