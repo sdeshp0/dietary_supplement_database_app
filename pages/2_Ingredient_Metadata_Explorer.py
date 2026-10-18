@@ -307,6 +307,32 @@ else:
         )
 
     shown = products[products["Market Status"] == "On Market"] if on_market else products
+
+    # Brands that sell this ingredient, biggest first. The counts are part
+    # of each option's label and a multiselect loses its value when its
+    # labels change, so the widget's key follows the counts and the choice
+    # is kept under its own key.
+    brand_counts = shown["Brand"].value_counts()
+    choice_key = f"brands_{selected}"
+    chosen_brands = [b for b in st.session_state.get(choice_key, []) if b in brand_counts]
+    widget_key = f"{choice_key}_{on_market}"
+
+    def remember_brands():
+        st.session_state[choice_key] = st.session_state[widget_key]
+
+    st.multiselect(
+        "Brands",
+        list(brand_counts.index),
+        default=chosen_brands,
+        key=widget_key,
+        on_change=remember_brands,
+        format_func=lambda b: f"{b} ({brand_counts[b]:,})",
+        placeholder=f"All {len(brand_counts):,} brands",
+        help="Show only these brands' products. Brands are listed by how many "
+        "products they sell with this ingredient.",
+    )
+    if chosen_brands:
+        shown = shown[shown["Brand"].isin(chosen_brands)]
     if sort_by == "Lowest dose":
         shown = shown.sort_values("Dose", ascending=True, na_position="last")
     elif sort_by == "Product name":
@@ -335,7 +361,7 @@ else:
         shown[columns],
         hide_index=True,
         width="stretch",
-        key=f"products_{selected}_{on_market}_{sort_by}",
+        key=f"products_{selected}_{on_market}_{sort_by}_{chosen_brands}",
         on_select="rerun",
         selection_mode="multi-row",
         column_config={
