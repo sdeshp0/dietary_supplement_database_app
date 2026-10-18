@@ -1,5 +1,7 @@
 mechanism,category,compound
 Serotonin modulation,Bioactive,5-HTP
+Antioxidant activity,Herb,Alfalfa
+Bowel regularity,Herb,Aloe vera
 Digestive support,Enzyme,Alpha-galactosidase
 Mitochondrial support,Bioactive,Alpha-lipoic acid
 Glucose metabolism / insulin sensitivity,Bioactive,Alpha-lipoic acid
@@ -10,9 +12,12 @@ Heavy metal chelation,Bioactive,Alpha-lipoic acid
 Insulin sensitivity,Bioactive,Alpha-lipoic acid
 Glycation reduction,Bioactive,Alpha-lipoic acid
 Digestive support,Enzyme,Amylase
+Digestive support,Herb,Artichoke
+Liver support,Herb,Artichoke
 HPA axis modulation,Herb,Ashwagandha
 Cortisol regulation,Herb,Ashwagandha
 Adaptogenic response,Herb,Ashwagandha
+Immune modulation,Herb,Astragalus
 Mitochondrial support,Vitamin,B1
 ATP production,Vitamin,B1
 Mitochondrial support,Vitamin,B12
@@ -50,14 +55,27 @@ Digestive support,Enzyme,Beta-glucanase
 Immune modulation,Bioactive,Beta-glucans
 Homocysteine reduction,Bioactive,Betaine (TMG)
 DNA repair / methylation,Bioactive,Betaine (TMG)
+Capillary support,Herb,Bilberry
+Antioxidant activity,Herb,Bilberry
 Hair support,Vitamin,Biotin
+Estrogen modulation,Herb,Black cohosh
+Digestive support,Herb,Black pepper
 Testosterone support,Mineral,Boron
+Anti-inflammatory,Herb,Boswellia
 Digestive support,Enzyme,Bromelain
+Diuretic action,Herb,Burdock
+Anti-inflammatory,Herb,Burdock
 Adenosine receptor blocking,Bioactive,Caffeine
 Bone mineralization,Mineral,Calcium
 Neuromuscular relaxation,Mineral,Calcium
 Estrogen modulation,Bioactive,Calcium-D-glucarate
+Digestive support,Herb,Cayenne
+Antioxidant activity,Herb,Cayenne
 Digestive support,Enzyme,Cellulase
+Sleep regulation,Herb,Chamomile
+Anxiolytic pathways,Herb,Chamomile
+Digestive support,Herb,Chamomile
+Antioxidant activity,Herb,Chlorella
 Acetylcholine modulation,Bioactive,Choline
 Homocysteine reduction,Bioactive,Choline
 DNA repair / methylation,Bioactive,Choline
@@ -80,6 +98,8 @@ Mitochondrial support,Bioactive,CoQ10
 ATP production,Bioactive,CoQ10
 Neuroprotection,Bioactive,CoQ10
 Antioxidant activity,Bioactive,CoQ10
+Urinary tract support,Herb,Cranberry
+Antioxidant activity,Herb,Cranberry
 Mitochondrial support,Bioactive,Creatine
 ATP production,Bioactive,Creatine
 Muscle protein synthesis,Bioactive,Creatine
@@ -88,8 +108,16 @@ BDNF upregulation,Bioactive,Curcumin
 Anti-inflammatory,Bioactive,Curcumin
 Cytokine modulation,Bioactive,Curcumin
 Testosterone support,Amino acid,D-aspartic acid
+Digestive support,Herb,Dandelion
+Diuretic action,Herb,Dandelion
 Estrogen modulation,Bioactive,DIM
+Immune modulation,Herb,Echinacea
 Autophagy activation,Bioactive,EGCG
+Immune modulation,Herb,Elderberry
+Antioxidant activity,Herb,Elderberry
+Adaptogenic response,Herb,Eleuthero
+Digestive support,Herb,Fennel
+Glucose metabolism / insulin sensitivity,Herb,Fenugreek
 Estrogen modulation,Macronutrient,Fiber
 Carbohydrate absorption,Macronutrient,Fiber
 Senolytic activity,Bioactive,Fisetin
@@ -101,6 +129,9 @@ DNA repair / methylation,Vitamin,Folate
 Phase II detox,Vitamin,Folate
 Anxiolytic pathways,Bioactive,GABA-related compounds
 Antimicrobial activity,Bioactive,Garlic (allicin)
+Digestive support,Herb,Ginger
+Anti-inflammatory,Herb,Ginger
+Neuroprotection,Herb,Ginkgo
 Digestive support,Enzyme,Glucoamylase
 Cartilage support,Bioactive,Glucosamine
 Sleep regulation,Amino acid,Glycine
@@ -109,6 +140,10 @@ Antioxidant defense systems,Amino acid,Glycine
 Collagen synthesis,Amino acid,Glycine
 Anxiolytic pathways,Amino acid,Glycine
 Phase II detox,Amino acid,Glycine
+Antimicrobial activity,Herb,Goldenseal
+Antioxidant activity,Herb,Grape seed
+Capillary support,Herb,Grape seed
+Cardiac function support,Herb,Hawthorn
 Digestive support,Enzyme,Hemicellulase
 HPA axis modulation,Herb,Holy basil
 Cortisol regulation,Herb,Holy basil
@@ -131,8 +166,12 @@ Muscle protein synthesis,Amino acid,L-lysine
 Collagen synthesis,Amino acid,L-lysine
 Antimicrobial activity,Amino acid,L-lysine
 Digestive support,Enzyme,Lactase
+Anxiolytic pathways,Herb,Lemon balm
+Sleep regulation,Herb,Lemon balm
+Digestive support,Herb,Lemon balm
 Muscle protein synthesis,Amino acid,Leucine
 Gut barrier integrity,Amino acid,L-glutamine
+Digestive support,Herb,Licorice
 BDNF upregulation,Bioactive,Lion's Mane
 Digestive support,Enzyme,Lipase
 GABA modulation,Amino acid,L-theanine
@@ -141,6 +180,7 @@ Anxiolytic pathways,Amino acid,L-theanine
 Macular pigment support,Bioactive,Lutein
 Antioxidant activity,Bioactive,Lutein
 Antioxidant activity,Bioactive,Lycopene
+Antioxidant activity,Herb,Maca
 Mitochondrial support,Mineral,Magnesium
 ATP production,Mineral,Magnesium
 Glucose metabolism / insulin sensitivity,Mineral,Magnesium
@@ -160,6 +200,9 @@ Insulin sensitivity,Mineral,Magnesium
 Neuroprotection,Mineral,Magnesium threonate
 Mitochondrial support,Mineral,Manganese
 Antioxidant defense systems,Mineral,Manganese
+Digestive support,Herb,Marshmallow
+Liver support,Herb,Milk thistle
+Antioxidant activity,Herb,Milk thistle
 Sulfite breakdown,Mineral,Molybdenum
 Sleep regulation,Bioactive,Melatonin
 Phase II detox,Bioactive,MSM
@@ -183,7 +226,10 @@ HPA axis modulation,Herb,Panax ginseng
 Adaptogenic response,Herb,Panax ginseng
 Digestive support,Enzyme,Pancreatin
 Digestive support,Enzyme,Papain
+Anxiolytic pathways,Herb,Passionflower
+Sleep regulation,Herb,Passionflower
 Digestive support,Enzyme,Pectinase
+Digestive support,Herb,Peppermint
 Digestive support,Enzyme,Pepsin
 Acetylcholine modulation,Bioactive,Phosphatidylcholine
 Acetylcholine modulation,Bioactive,Phosphatidylserine
@@ -193,6 +239,7 @@ Lipid modulation,Bioactive,Plant sterols
 Antioxidant activity,Bioactive,Polyphenols
 Microbiome modulation,Bioactive,Polyphenols
 Skin antioxidant protection,Bioactive,Polyphenols
+Antioxidant activity,Herb,Pomegranate
 Neuromuscular relaxation,Mineral,Potassium
 Microbiome modulation,Bioactive,Prebiotics
 Immune modulation,Bioactive,Probiotics
@@ -202,6 +249,7 @@ Digestive support,Enzyme,Protease
 Anti-inflammatory,Bioactive,Quercetin
 Cytokine modulation,Bioactive,Quercetin
 Senolytic activity,Bioactive,Quercetin
+Estrogen modulation,Herb,Red clover
 Lipid modulation,Bioactive,Red yeast rice
 Neuroprotection,Bioactive,Resveratrol
 Anti-inflammatory,Bioactive,Resveratrol
@@ -213,6 +261,7 @@ Mitochondrial support,Bioactive,Ribose
 ATP production,Bioactive,Ribose
 Antioxidant activity,Bioactive,Rutin
 Capillary support,Bioactive,Rutin
+Prostate support,Herb,Saw palmetto
 Thyroid support,Mineral,Selenium
 Immune modulation,Mineral,Selenium
 Antioxidant activity,Mineral,Selenium
@@ -225,10 +274,18 @@ Hair support,Bioactive,Silica
 Glucose metabolism / insulin sensitivity,Macronutrient,Soluble fiber
 Lipid modulation,Macronutrient,Soluble fiber
 Autophagy activation,Bioactive,Spermidine
+Antioxidant activity,Herb,Spirulina
+Immune modulation,Herb,Spirulina
+Serotonin modulation,Herb,St. John's wort
+Prostate support,Herb,Stinging nettle
+Diuretic action,Herb,Stinging nettle
+Anti-inflammatory,Herb,Stinging nettle
 GABA modulation,Amino acid,Taurine
 Serotonin modulation,Amino acid,Tryptophan
 Thyroid support,Amino acid,Tyrosine
 Dopamine modulation,Amino acid,Tyrosine
+Sleep regulation,Herb,Valerian
+Anxiolytic pathways,Herb,Valerian
 Muscle protein synthesis,Amino acid,Valine
 Immune modulation,Vitamin,Vitamin A
 Neuroprotection,Vitamin,Vitamin C
