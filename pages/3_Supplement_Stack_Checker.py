@@ -4,10 +4,23 @@ import pandas as pd
 import streamlit as st
 
 from utils.dsld_helpers import search_products, stack_product
-from utils.stack import MAX_SERVINGS, StackItem, format_stack, parse_stack, stack_totals
+from utils.stack import (MAX_SERVINGS, StackItem, format_stack, parse_stack,
+                         stack_other_ingredients, stack_totals)
 from utils.stack_state import current_stack, remember_stack
 
 SEARCH_RESULTS = 20
+
+
+def details_link(compound):
+    """Link to the compound's entry in the Ingredient Metadata Explorer."""
+    return f"Ingredient_Metadata_Explorer?compound={quote(compound)}"
+
+
+DETAILS_COLUMN = st.column_config.LinkColumn(
+    "Ingredient details",
+    help="Opens this ingredient in the Ingredient Metadata Explorer",
+    display_text="Details",
+)
 
 # ---------------------------------------------------------
 # PAGE CONFIG
@@ -147,11 +160,13 @@ else:
         lambda s: 0 if s.startswith("Over the limit") else 1 if s.startswith("Over") else 2
     )
     totals = totals.assign(_rank=rank).sort_values(["_rank", "Nutrient"]).drop(columns="_rank")
+    totals.insert(1, "Details", totals["Nutrient"].map(details_link))
     st.dataframe(
         totals,
         hide_index=True,
         width="stretch",
         column_config={
+            "Details": DETAILS_COLUMN,
             "% of adult RDA": st.column_config.TextColumn(
                 help="Daily total as a share of the recommended amount for adults",
             ),
@@ -171,6 +186,31 @@ else:
         "food. Beta-carotene counts toward vitamin A but not toward its upper limit. "
         "Caffeine is compared with the FDA's 400 mg a day for most healthy adults. Label "
         "data comes from the NIH DSLD and can contain entry errors."
+    )
+
+# ---------------------------------------------------------
+# OTHER INGREDIENTS (no RDA or upper limit to add up against)
+# ---------------------------------------------------------
+others = stack_other_ingredients(
+    [(products[i.dsld_id]["name"], products[i.dsld_id]["other"]) for i in stack]
+)
+if not others.empty:
+    st.markdown("### Other ingredients")
+    st.caption(
+        "Herbs and other ingredients with no NIH recommended amount or upper limit, "
+        "so they aren't added up. Amounts are per serving, as on the label."
+    )
+    others.insert(1, "Details", others["Ingredient"].map(details_link))
+    st.dataframe(
+        others,
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Details": DETAILS_COLUMN,
+            "From": st.column_config.TextColumn(
+                help="Each product's label rows for this ingredient", width="large",
+            ),
+        },
     )
 
 if not not_counted.empty:

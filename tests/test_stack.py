@@ -4,8 +4,8 @@ import unittest
 
 import pandas as pd
 
-from utils.stack import (StackItem, choose_label_column, format_stack, parse_stack,
-                         product_doses, stack_totals)
+from utils.stack import (StackItem, choose_label_column, format_stack, other_ingredients,
+                         parse_stack, product_doses, stack_other_ingredients, stack_totals)
 
 ALIASES = {
     "vitamin a": "Vitamin A",
@@ -119,6 +119,22 @@ class StackTotals(unittest.TestCase):
         totals, not_counted = stack_totals([])
         self.assertTrue(totals.empty)
         self.assertTrue(not_counted.empty)
+
+
+class OtherIngredients(unittest.TestCase):
+    def test_listed_by_ingredient_with_each_product(self):
+        multi = other_ingredients(facts([
+            ("Vitamin D3", "1000", "IU"), ("Turmeric", "500", "mg"), ("Unknown herb", "5", "mg"),
+        ]), ALIASES)
+        turmeric = other_ingredients(facts([("Turmeric", "250", "mg")]), ALIASES)
+        self.assertEqual(multi["compound"].tolist(), ["Curcumin"])
+        others = stack_other_ingredients([("Multi", multi), ("Turmeric", turmeric)])
+        self.assertEqual(others.to_dict("records"), [
+            {"Ingredient": "Curcumin", "From": "Multi: Turmeric 500 mg; Turmeric: Turmeric 250 mg"},
+        ])
+
+    def test_empty(self):
+        self.assertTrue(stack_other_ingredients([]).empty)
 
 
 if __name__ == "__main__":

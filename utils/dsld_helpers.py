@@ -7,7 +7,7 @@ import streamlit as st
 import fitz  # PyMuPDF
 
 from utils.dose import comparable_dose, compare_dose
-from utils.stack import choose_label_column, product_doses
+from utils.stack import choose_label_column, other_ingredients, product_doses
 from utils.units import target_unit
 
 
@@ -215,8 +215,9 @@ def dose_unit(compound):
 def stack_product(product_id):
     """
     What one product adds to a supplement stack: its name, brand, the
-    serving size its amounts are for, and its nutrient doses per serving
-    (utils/stack.py). None when the product isn't in the database.
+    serving size its amounts are for, its nutrient doses per serving and
+    its other linked ingredients (utils/stack.py). None when the product
+    isn't in the database.
     """
     product = get_product(product_id)
     if product is None:
@@ -224,11 +225,13 @@ def stack_product(product_id):
     facts = get_supplement_facts(product_id)
     column = choose_label_column(facts)
     serving = column["Serving Size"].iloc[0] if not column.empty else product.get("Serving Size")
+    aliases = load_ingredient_aliases()
     return {
         "name": product.get("Product Name"),
         "brand": product.get("Brand Name"),
         "serving": serving if isinstance(serving, str) else "",
-        "doses": product_doses(facts, load_ingredient_aliases()),
+        "doses": product_doses(facts, aliases),
+        "other": other_ingredients(facts, aliases),
     }
 
 
