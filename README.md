@@ -92,11 +92,11 @@ ingredient in `data/compound_sources.csv`:
 
 | `source_type` | Source | Ingredients |
 | --- | --- | --- |
-| `ODS` | NIH Office of Dietary Supplements, via the [Fact Sheet API](https://ods.od.nih.gov/api/) | 33 (vitamins, minerals, a few botanicals) |
-| `ODS_GROUP` | One row of an ODS group fact sheet (Exercise and Athletic Performance, Weight Loss) | 13 |
-| `NCCIH` | NIH National Center for Complementary and Integrative Health | 11 |
-| `HEALTH_CANADA` | [Health Canada Natural Health Product monographs](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/monosReq?lang=eng) | 17 |
-| `LPI` | [Linus Pauling Institute](https://lpi.oregonstate.edu/mic), Oregon State University | 5 |
+| `ODS` | NIH Office of Dietary Supplements, via the [Fact Sheet API](https://ods.od.nih.gov/api/) | 35 (vitamins, minerals, a few botanicals) |
+| `ODS_GROUP` | One row of an ODS group fact sheet (Exercise and Athletic Performance, Weight Loss) | 16 |
+| `NCCIH` | NIH National Center for Complementary and Integrative Health | 38 (mostly herbs) |
+| `HEALTH_CANADA` | [Health Canada Natural Health Product monographs](https://webprod.hc-sc.gc.ca/nhpid-bdipsn/monosReq?lang=eng) | 46 |
+| `LPI` | [Linus Pauling Institute](https://lpi.oregonstate.edu/mic), Oregon State University | 8 |
 | `MSK` | [Memorial Sloan Kettering, About Herbs](https://www.mskcc.org/herbs) | 2 |
 | `NONE` | No official or credible monograph found | 16 |
 
@@ -113,6 +113,11 @@ ingredient to its details. Edit it by hand; `python "other scripts/ingredient_ma
 checks it and lists the most common names it doesn't cover yet. It gives
 coverage both for all rows and for ingredient rows only, leaving out the
 Nutrition Facts lines (calories, fat, sugar, protein) some labels repeat.
+Herbs are mapped under every single-herb name a label uses ("ginger root
+extract", "organic ginger (zingiber officinale) rhizome supercritical extract");
+names that combine several herbs or a blend are left out. Deglycyrrhizinated
+licorice (DGL) isn't mapped to licorice, since the NCCIH licorice safety notes
+are about the glycyrrhizin DGL has removed.
 
 `python "other scripts/suggest_ingredient_aliases.py"` finds variants of names
 already mapped (salts like "magnesium citrate", forms like "creatine hcl",
