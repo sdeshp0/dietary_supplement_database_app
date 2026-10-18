@@ -168,22 +168,37 @@ def compare_dose(compound, ingredient, amount, unit):
 
     if looks_like_unit_error(compound, dose.value):
         return Comparison("", "Check label (unit error?)")
+    # The vitamin A upper limit is for preformed vitamin A (retinol), not
+    # beta-carotene
+    counts_toward_ul = not (compound == "Vitamin A" and is_beta_carotene(ingredient))
+    return compare_amount(compound, dose.value, dose.value if counts_toward_ul else 0,
+                          estimate=bool(dose.note))
+
+
+def compare_amount(compound, amount, ul_amount=None, estimate=False):
+    """
+    How an amount in the compound's target unit compares with the adult RDA
+    and UL. ul_amount is the part of it the upper limit applies to (all of
+    it unless given). Returns None when the compound has no reference.
+    """
+    reference = adult_reference(compound)
+    if reference is None:
+        return None
+    ul_amount = amount if ul_amount is None else ul_amount
 
     percent = ""
     if reference.rda and reference.rda[0] > 0:
         low, high = reference.rda
-        percent = _format_range(100 * dose.value / high, 100 * dose.value / low, "%")
+        percent = _format_range(100 * amount / high, 100 * amount / low, "%")
 
     status = ""
-    # The vitamin A upper limit is for preformed vitamin A (retinol), not
-    # beta-carotene
-    if reference.ul and not (compound == "Vitamin A" and is_beta_carotene(ingredient)):
+    if reference.ul:
         low, high = reference.ul
-        if dose.value > high:
+        if ul_amount > high:
             status = "Over the limit"
-        elif dose.value > low:
+        elif ul_amount > low:
             status = "Over for some adults"
-    if dose.note:
+    if estimate:
         # The label didn't settle the form, so the conversion is an estimate
         percent = f"{percent} (estimate)" if percent else percent
         status = f"{status} (estimate)" if status else status

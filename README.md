@@ -61,7 +61,8 @@ dietary_supplement_database_app/
 ├── Home.py
 ├── pages/
 │   ├── 1_Dietary_Supplement_Label_Explorer.py
-│   └── 2_Ingredient_Metadata_Explorer.py
+│   ├── 2_Ingredient_Metadata_Explorer.py
+│   └── 3_Supplement_Stack_Checker.py
 │
 ├── utils/
 │   ├── dsld_helpers.py
@@ -146,6 +147,14 @@ error on the label.
 
 The Ingredient Explorer lists the products that contain the selected
 ingredient, sortable by dose, with links back to each label.
+
+The Supplement Stack Checker (`utils/stack.py`) adds up each vitamin and
+mineral across the products someone takes, times their servings per day, and
+compares the daily totals with the same adult RDA and upper limit. The stack
+is kept in the page link (`?stack=683:1,2043:2`). Where a label gives amounts
+for several serving sizes, the adult column is used; a form listed under its
+total ("Beta-Carotene" under "Vitamin A") isn't added twice; vitamin K1 and K2
+add up to one vitamin K total.
 
 ## 🛠 Tech Stack
 - Python 3.10+
