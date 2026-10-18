@@ -11,7 +11,7 @@ from typing import NamedTuple
 
 import pandas as pd
 
-from utils.dose import (MINERALS, SALT_NAME, adult_reference, compare_amount,
+from utils.dose import (SALT_NAME, SALT_WEIGHT, adult_reference, compare_amount,
                         looks_like_unit_error)
 from utils.units import is_beta_carotene, normalize_amount, target_unit
 
@@ -119,8 +119,8 @@ def product_doses(facts, aliases):
                "label_amount": label, "dose": None, "ul_dose": None,
                "estimate": False, "not_counted": "", "generic": _is_generic(name, group)}
         dose = normalize_amount(amount, unit, compound, ingredient)
-        if compound in MINERALS and SALT_NAME.search(ingredient):
-            row["not_counted"] = "Salt weight, not the mineral"
+        if compound in SALT_WEIGHT and SALT_NAME.search(ingredient):
+            row["not_counted"] = "Weight of the whole salt"
         elif dose is None:
             row["not_counted"] = "No amount on the label"
         elif dose.unit != target_unit(group):

@@ -168,7 +168,8 @@ else:
         "RDA and upper limit are NIH Office of Dietary Supplements values for adults 19 "
         "and older, not pregnant or breastfeeding; a range covers the differences between "
         "men and women and between age groups. Totals count these supplements only, not "
-        "food. Beta-carotene counts toward vitamin A but not toward its upper limit. Label "
+        "food. Beta-carotene counts toward vitamin A but not toward its upper limit. "
+        "Caffeine is compared with the FDA's 400 mg a day for most healthy adults. Label "
         "data comes from the NIH DSLD and can contain entry errors."
     )
 
@@ -176,7 +177,8 @@ if not not_counted.empty:
     with st.expander(f"Not counted ({len(not_counted)} label rows)"):
         st.dataframe(not_counted, hide_index=True, width="stretch")
         st.caption(
-            "\"Salt weight\": a mineral named as a salt, such as magnesium citrate, may list "
+            "\"Weight of the whole salt\": a mineral or caffeine named as a salt, such as "
+            "magnesium citrate, may list "
             "the weight of the whole salt, so it isn't added. \"Part of the total above it\": "
             "the label lists a form (beta-carotene) under its total (vitamin A), which is "
             "counted instead."

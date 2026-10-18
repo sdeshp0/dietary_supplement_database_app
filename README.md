@@ -103,7 +103,9 @@ ingredient in `data/compound_sources.csv`:
 To refresh: `python "other scripts/compound_metadata_scraper.py"`. A compound
 that fails to fetch keeps its previous data. Where an ODS fact sheet gives the
 adult upper limit in a sentence rather than a table (vitamin E), the scraper
-reads it from the sentence.
+reads it from the sentence. For an NCCIH page about several ingredients, the
+`source_section` column names them as the page's headings do ("glucosamine and
+chondroitin").
 
 `data/ingredient_aliases.csv` maps DSLD ingredient names (lowercased, single
 spaces) to ontology compounds, so a product's Supplement Facts can link each
@@ -143,7 +145,9 @@ the amount may be the whole salt. Amounts over 100 times the upper limit,
 or over 5 times the 99th percentile of
 DSLD labels for that compound (`data/dose_ceilings.csv`, from
 `python "other scripts/build_dose_ceilings.py"`), are flagged as a likely unit
-error on the label.
+error on the label. Caffeine, which has no ODS fact sheet, is compared with the
+FDA's 400 mg a day for most healthy adults (`OTHER_LIMITS`); like minerals, it
+isn't compared when named as a salt (caffeine citrate).
 
 The Ingredient Explorer lists the products that contain the selected
 ingredient, sortable by dose, with links back to each label.

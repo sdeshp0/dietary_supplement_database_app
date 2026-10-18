@@ -201,7 +201,8 @@ with t1:
                 "RDA and upper limit are NIH Office of Dietary Supplements values for "
                 "adults 19 and older, not pregnant or breastfeeding. A range covers the "
                 "differences between men and women and between age groups. The "
-                "comparison is for one serving; check the label for servings per day."
+                "comparison is for one serving; check the label for servings per day. "
+                "Caffeine is compared with the FDA's 400 mg a day for most healthy adults."
             )
         # Link each ingredient that maps to an ontology compound to its
         # entry in the Ingredient Metadata Explorer
@@ -218,7 +219,7 @@ with t1:
                 ),
                 "Upper limit": st.column_config.TextColumn(
                     help="Whether one serving goes over the adult tolerable upper intake level. "
-                    "\"Salt weight\": a mineral named as a salt, such as magnesium citrate, "
+                    "\"Salt weight\": a mineral or caffeine named as a salt, such as magnesium citrate, "
                     "may list the weight of the whole salt, so it isn't compared.",
                     width="medium",
                 ),

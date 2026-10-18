@@ -22,5 +22,33 @@ class ProseUpperLimit(unittest.TestCase):
         self.assertIsNone(scraper.ods_prose_upper_limit(None))
 
 
+
+class NccihSections(unittest.TestCase):
+    LINES = [
+        "What is osteoarthritis?", "A joint disease.",
+        "What are glucosamine and chondroitin?", "Structural parts of cartilage.",
+        "Are glucosamine and chondroitin helpful for symptoms of knee osteoarthritis?",
+        "Mixed results.",
+        "Are glucosamine and chondroitin safe?", "No serious side effects were found.",
+        "For More Information", "Clearinghouse.",
+    ]
+
+    def setUp(self):
+        self.fetch_soup, self.page_lines = scraper.fetch_soup, scraper.page_lines
+        scraper.fetch_soup = lambda url: None
+        scraper.page_lines = lambda soup: self.LINES
+
+    def tearDown(self):
+        scraper.fetch_soup, scraper.page_lines = self.fetch_soup, self.page_lines
+
+    def test_page_about_several_ingredients(self):
+        record = scraper.scrape_nccih({
+            "compound": "Glucosamine", "category": "Bioactive", "source_url": "https://x",
+            "source_section": "glucosamine and chondroitin",
+        })
+        self.assertEqual(record["primary_functions"], "Structural parts of cartilage.")
+        self.assertEqual(record["safety_overview"], "No serious side effects were found.")
+
+
 if __name__ == "__main__":
     unittest.main()
