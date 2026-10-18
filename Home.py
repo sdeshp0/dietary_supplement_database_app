@@ -41,8 +41,8 @@ st.write(
     """
     Explore products from the **NIH Dietary Supplement Label Database (DSLD)**.
     You can:
-    - Search by product name  
-    - Filter by brand and supplement form  
+    - Search by product name and browse the matching products in a table  
+    - Filter by brand and supplement form (only the ones that match your search)  
     - Look up products by barcode  
     - View product labels, factsheets, and ingredient lists  
     - Explore related products from the same brand  

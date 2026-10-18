@@ -19,7 +19,7 @@ DB_PATH = DATA_DIR / "dsld.duckdb"
 ALIASES_CSV = DATA_DIR / "ingredient_aliases.csv"
 
 FORM_COL = "Supplement Form [LanguaL]"
-SEARCH_LIMIT = 50
+SEARCH_LIMIT = 200
 
 
 # ---------------------------------------------------------
@@ -90,22 +90,8 @@ def get_product_by_barcode(barcode_digits):
     return None if df.empty else df.iloc[0]
 
 
-@st.cache_data(show_spinner=False)
-def list_values(column):
-    """
-    Sorted distinct values of a products column, for filter dropdowns.
-    """
-    df = query(
-        f'SELECT DISTINCT "{column}" AS v FROM products WHERE "{column}" IS NOT NULL ORDER BY v'
-    )
-    return df["v"].tolist()
-
-
-def search_products(name="", brand=None, form=None, limit=SEARCH_LIMIT):
-    """
-    Products whose name contains `name` (case-insensitive), optionally
-    filtered by brand and supplement form.
-    """
+def _search_filter(name="", brand=None, form=None, on_market=False):
+    """WHERE clause and parameters for a product search."""
     conditions, params = [], []
     if name:
         conditions.append('contains(lower("Product Name"), lower(?))')
@@ -116,13 +102,50 @@ def search_products(name="", brand=None, form=None, limit=SEARCH_LIMIT):
     if form:
         conditions.append(f'"{FORM_COL}" = ?')
         params.append(form)
+    if on_market:
+        conditions.append('"Market Status" = \'On Market\'')
+    return " AND ".join(conditions) or "TRUE", params
 
-    where = " AND ".join(conditions) or "TRUE"
+
+def search_products(name="", brand=None, form=None, on_market=False, limit=SEARCH_LIMIT):
+    """
+    Products whose name contains `name` (case-insensitive), optionally
+    filtered by brand, supplement form and market status, by name.
+    """
+    where, params = _search_filter(name, brand, form, on_market)
     return query(
-        f'SELECT "DSLD ID", "Product Name", "Brand Name" FROM products '
-        f'WHERE {where} ORDER BY "Product Name" LIMIT {int(limit)}',
+        f'SELECT "DSLD ID", "Product Name", "Brand Name", "{FORM_COL}" AS "Form", '
+        f'"Market Status" FROM products WHERE {where} '
+        f'ORDER BY lower("Product Name"), "DSLD ID" LIMIT {int(limit)}',
         params,
     )
+
+
+@st.cache_data(show_spinner=False, max_entries=256)
+def count_products(name="", brand=None, form=None, on_market=False):
+    where, params = _search_filter(name, brand, form, on_market)
+    return int(query(f"SELECT count(*) AS n FROM products WHERE {where}", params)["n"].iloc[0])
+
+
+@st.cache_data(show_spinner=False, max_entries=256)
+def search_facet(column, name="", brand=None, form=None, on_market=False):
+    """
+    {value: number of products} for a filter dropdown ("Brand Name" or the
+    form column), counting only products that match the rest of the search,
+    so the dropdown offers only values that give results. The column's own
+    filter is left out.
+    """
+    if column == "Brand Name":
+        brand = None
+    elif column == FORM_COL:
+        form = None
+    where, params = _search_filter(name, brand, form, on_market)
+    df = query(
+        f'SELECT "{column}" AS v, count(*) AS n FROM products '
+        f'WHERE {where} AND "{column}" IS NOT NULL GROUP BY 1 ORDER BY lower(v)',
+        params,
+    )
+    return dict(zip(df["v"], df["n"]))
 
 
 # ---------------------------------------------------------

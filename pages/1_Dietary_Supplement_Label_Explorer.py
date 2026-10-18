@@ -1,3 +1,4 @@
+import re
 from urllib.parse import quote
 
 import streamlit as st
@@ -8,8 +9,9 @@ from utils.dsld_helpers import (
     get_product,
     get_product_by_barcode,
     get_supplement_facts,
-    list_values,
+    count_products,
     parse_dsld_id,
+    search_facet,
     search_products,
     extract_overview_fields,
     extract_factsheet_fields,
@@ -44,7 +46,69 @@ st.caption(
 # ---------------------------------------------------------
 # READ QUERY PARAMS
 # ---------------------------------------------------------
+# The open product (dsld_id) and the search (q, brand, form, market) are kept
+# in the page link, so "Back to results" and a shared link restore both
 preselected_id = st.query_params.get("dsld_id")
+
+SEARCH_PARAMS = {"q": "search_q", "brand": "search_brand", "form": "search_form"}
+for param, key in SEARCH_PARAMS.items():
+    if key not in st.session_state:
+        st.session_state[key] = st.query_params.get(param, "")
+if "search_market" not in st.session_state:
+    st.session_state["search_market"] = st.query_params.get("market") == "1"
+
+
+def sync_search_params():
+    """Mirrors the search widgets in the page link."""
+    for param, key in SEARCH_PARAMS.items():
+        value = st.session_state[key]
+        if value:
+            st.query_params[param] = value
+        elif param in st.query_params:
+            del st.query_params[param]
+    if st.session_state["search_market"]:
+        st.query_params["market"] = "1"
+    elif "market" in st.query_params:
+        del st.query_params["market"]
+
+
+def open_product(dsld_id):
+    st.query_params["dsld_id"] = str(dsld_id)
+    st.rerun()
+
+
+def short_form(form):
+    """'Capsule [E0159]' -> 'Capsule' (drops the LanguaL code)."""
+    return re.sub(r"\s*\[[^\]]*\]$", "", form) if isinstance(form, str) else form
+
+
+def facet_select(label, column, key, all_label, **search):
+    """
+    A filter dropdown listing only the values that give results, with
+    counts. The counts are part of each option's label, and a selectbox
+    loses its value when its labels change, so the widget gets a new key
+    whenever the counts do and the choice itself is kept under `key`.
+    """
+    counts = search_facet(column, **search)
+    current = st.session_state[key]
+    if current and current not in counts:
+        counts = {current: 0, **counts}
+    options = [""] + list(counts)
+    widget_key = f"{key}_{hash(tuple(counts.items()))}"
+
+    def remember():
+        st.session_state[key] = st.session_state[widget_key]
+
+    st.sidebar.selectbox(
+        label,
+        options,
+        index=options.index(current),
+        key=widget_key,
+        on_change=remember,
+        format_func=lambda v: f"{short_form(v)} ({counts[v]:,})" if v else all_label,
+        help="Lists only the values with products that match the rest of your search",
+    )
+
 
 # ---------------------------------------------------------
 # SIDEBAR: PRODUCT LOOKUP MODES
@@ -70,43 +134,36 @@ if preselected_id:
         selected_product = match
         product_id = int(selected_product["DSLD ID"])
         product_name = selected_product.get("Product Name", "")
-        st.sidebar.success(f"Loaded via link: {product_name}")
     else:
         st.sidebar.error("No product found for DSLD ID from URL.")
         preselected_id = None
 
 # ---------------------------------------------------------
-# 2) SEARCH MODE — ALWAYS AVAILABLE
+# 2) SEARCH MODE: filters in the sidebar, results in the main area
 # ---------------------------------------------------------
+search = {}
 if lookup_mode == "Search":
 
     st.sidebar.subheader("🔎 Search Products")
 
-    search_name = st.sidebar.text_input("Search by product name:", "")
+    st.sidebar.text_input("Search by product name:", key="search_q")
+    st.sidebar.checkbox("On the market only", key="search_market")
+    search = {
+        "name": st.session_state["search_q"].strip(),
+        "brand": st.session_state["search_brand"] or None,
+        "form": st.session_state["search_form"] or None,
+        "on_market": st.session_state["search_market"],
+    }
+    facet_select("Filter by brand:", "Brand Name", "search_brand", "All brands", **search)
+    facet_select("Filter by supplement form:", FORM_COL, "search_form", "All forms", **search)
+    sync_search_params()
 
-    brand_filter = st.sidebar.selectbox("Filter by brand:", ["All"] + list_values("Brand Name"))
-    form_filter = st.sidebar.selectbox(
-        "Filter by supplement form:", ["All"] + list_values(FORM_COL)
-    )
-
-    # Display results
-    if search_name or brand_filter != "All" or form_filter != "All":
-        results = search_products(
-            name=search_name,
-            brand=None if brand_filter == "All" else brand_filter,
-            form=None if form_filter == "All" else form_filter,
-        )
-
-        st.sidebar.markdown("### Results")
-
-        if results.empty:
-            st.sidebar.info("No products match your search.")
-        else:
-            for _, row in results.iterrows():
-                label = f"{row['Product Name']} ({row['Brand Name']})"
-                if st.sidebar.button(label, key=f"search_{row['DSLD ID']}"):
-                    st.query_params.dsld_id = str(row["DSLD ID"])
-                    st.rerun()
+    # Changing the search while a product is open goes back to the results
+    previous = st.session_state.get("last_search")
+    st.session_state["last_search"] = search
+    if previous is not None and previous != search and selected_product is not None:
+        del st.query_params["dsld_id"]
+        selected_product = product_id = product_name = preselected_id = None
 
 # ---------------------------------------------------------
 # 3) BARCODE MODE — ALWAYS AVAILABLE
@@ -131,12 +188,72 @@ if lookup_mode == "Barcode":
             product_name = selected_product.get("Product Name", "")
             st.sidebar.success(f"Found product: {product_name}")
 
+searching = any(v for k, v in search.items() if k != "on_market")
+
 # ---------------------------------------------------------
-# STOP IF NO PRODUCT SELECTED
+# NO PRODUCT OPEN: SEARCH RESULTS
 # ---------------------------------------------------------
 if selected_product is None:
-    st.info("Use the sidebar to search for a product by Name and Brand or by UPC Barcode")
+    if not searching:
+        st.info(
+            "Search by product name, or pick a brand or supplement form in the sidebar, "
+            "to list products. You can also look a product up by its UPC barcode."
+        )
+        st.stop()
+
+    total = count_products(**search)
+    results = search_products(**search)
+    if results.empty:
+        st.info("No products match your search.")
+        st.stop()
+
+    st.markdown("### Products")
+    more = " Narrow your search to see the rest." if total > len(results) else ""
+    st.caption(
+        f"Showing {len(results):,} of {total:,} products, by name.{more} "
+        "Tick a product to open it or add it to your stack."
+    )
+    results["Form"] = results["Form"].map(short_form)
+    columns = ["Product Name", "Brand Name", "Form", "Market Status"]
+    if search["on_market"]:
+        columns.remove("Market Status")
+    selection = st.dataframe(
+        results[columns],
+        hide_index=True,
+        width="stretch",
+        key=f"results_{sorted(search.items())}",
+        on_select="rerun",
+        selection_mode="multi-row",
+        column_config={
+            "Product Name": st.column_config.TextColumn("Product", width="large"),
+            "Brand Name": st.column_config.TextColumn("Brand", width="medium"),
+        },
+    )
+    chosen = results.iloc[selection.selection.rows]
+    col_open, col_add = st.columns(2)
+    with col_open:
+        if len(chosen) == 1:
+            if st.button(f"Open {chosen['Product Name'].iloc[0]}", type="primary"):
+                open_product(int(chosen["DSLD ID"].iloc[0]))
+        else:
+            st.button(
+                "Open the ticked product" if not len(chosen) else "Tick one product to open it",
+                disabled=True,
+            )
+    with col_add:
+        if st.button(
+            f"➕ Add {len(chosen)} selected to stack" if len(chosen)
+            else "➕ Tick products to add them to your stack",
+            disabled=chosen.empty,
+            help="Adds the ticked products to the Supplement Stack Checker",
+        ):
+            add_to_stack(chosen["DSLD ID"].tolist())
     st.stop()
+
+if searching and preselected_id:
+    if st.button("← Back to results"):
+        del st.query_params["dsld_id"]
+        st.rerun()
 
 # ---------------------------------------------------------
 # MAIN TABS
