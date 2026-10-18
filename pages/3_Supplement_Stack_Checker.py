@@ -5,6 +5,7 @@ import streamlit as st
 
 from utils.dsld_helpers import search_products, stack_product
 from utils.stack import MAX_SERVINGS, StackItem, format_stack, parse_stack, stack_totals
+from utils.stack_state import current_stack, remember_stack
 
 SEARCH_RESULTS = 20
 
@@ -31,6 +32,7 @@ st.caption(
 # THE STACK, KEPT IN THE PAGE LINK (?stack=ID:servings,...)
 # ---------------------------------------------------------
 def save_stack(items):
+    remember_stack(items)
     if items:
         st.query_params["stack"] = format_stack(items)
     elif "stack" in st.query_params:
@@ -38,8 +40,16 @@ def save_stack(items):
     st.rerun()
 
 
-stack = [item for item in parse_stack(st.query_params.get("stack", ""))
-         if stack_product(item.dsld_id) is not None]
+# The link wins; without one (opened from the menu) the stack built earlier
+# in this visit is restored
+if "stack" in st.query_params:
+    stack = parse_stack(st.query_params["stack"])
+else:
+    stack = current_stack()
+stack = [item for item in stack if stack_product(item.dsld_id) is not None]
+remember_stack(stack)
+if stack and st.query_params.get("stack") != format_stack(stack):
+    st.query_params["stack"] = format_stack(stack)
 
 # ---------------------------------------------------------
 # SIDEBAR: ADD A PRODUCT
@@ -91,7 +101,8 @@ edited = st.data_editor(
             "for several serving sizes, the one for adults is used.",
         ),
         "Servings per day": st.column_config.NumberColumn(
-            min_value=0.5, max_value=MAX_SERVINGS, step=0.5,
+            help="For a weekly dose, such as 50,000 IU of vitamin D once a week, use 0.14",
+            min_value=0.1, max_value=MAX_SERVINGS, step=0.01, format="%.2g",
         ),
     },
 )

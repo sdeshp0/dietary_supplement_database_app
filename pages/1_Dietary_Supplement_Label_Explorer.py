@@ -20,6 +20,7 @@ from utils.dsld_helpers import (
     normalize_barcode,
     build_supplement_facts_table,
 )
+from utils.stack_state import add_to_stack, in_stack, open_stack
 
 # ---------------------------------------------------------
 # PAGE CONFIG
@@ -178,7 +179,16 @@ with t1:
     st.table(summary_df)
 
     # Supplement Facts panel
-    st.markdown("### Supplement Facts")
+    col_title, col_stack = st.columns([3, 1], vertical_alignment="bottom")
+    with col_title:
+        st.markdown("### Supplement Facts")
+    with col_stack:
+        if in_stack(product_id):
+            if st.button("✓ In your stack", help="Open the Supplement Stack Checker"):
+                open_stack()
+        elif st.button("➕ Add to stack", type="primary",
+                       help="Add this product to the Supplement Stack Checker"):
+            add_to_stack([product_id])
     facts_table = build_supplement_facts_table(facts_rows)
     if facts_table.empty:
         st.info("No Supplement Facts data for this product.")

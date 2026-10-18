@@ -44,6 +44,7 @@ st.write(
     Add up the vitamins and minerals in the supplements you take.
     You can:
     - Build a stack of products and set servings per day  
+    - Add products from the Label Explorer or an ingredient's product list  
     - See each nutrient's daily total against the adult RDA and upper limit  
     - Bookmark or share the stack with its link  
     """
