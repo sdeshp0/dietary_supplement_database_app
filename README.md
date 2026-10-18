@@ -163,10 +163,10 @@ compares the daily totals with the same adult RDA and upper limit. The stack
 is kept in the page link (`?stack=683:1,2043:2`). Where a label gives amounts
 for several serving sizes, the adult column is used; a form listed under its
 total ("Beta-Carotene" under "Vitamin A") isn't added twice; vitamin K1 and K2
-add up to one vitamin K total. Products can also be added from the Label
-Explorer ("Add to stack") and from an ingredient's product list (tick rows,
-then add them); the stack is kept while moving between pages
-(`utils/stack_state.py`).
+add up to one vitamin K total. Products are added from the Label Explorer
+("Add to stack"; the stack page links there for its search) and from an
+ingredient's product list (tick rows, then add them); the stack is kept while
+moving between pages (`utils/stack_state.py`).
 
 ## 🛠 Tech Stack
 - Python 3.10+
