@@ -1,5 +1,6 @@
 mechanism,category,compound
 Serotonin modulation,Bioactive,5-HTP
+Digestive support,Enzyme,Alpha-galactosidase
 Mitochondrial support,Bioactive,Alpha-lipoic acid
 Glucose metabolism / insulin sensitivity,Bioactive,Alpha-lipoic acid
 Neuroprotection,Bioactive,Alpha-lipoic acid
@@ -44,22 +45,28 @@ Glycation reduction,Bioactive,Benfotiamine
 Glucose metabolism / insulin sensitivity,Bioactive,Berberine
 Insulin sensitivity,Bioactive,Berberine
 Antimicrobial activity,Bioactive,Berberine
+Muscle acid buffering,Amino acid,Beta-alanine
+Digestive support,Enzyme,Beta-glucanase
 Immune modulation,Bioactive,Beta-glucans
 Homocysteine reduction,Bioactive,Betaine (TMG)
 DNA repair / methylation,Bioactive,Betaine (TMG)
 Hair support,Vitamin,Biotin
 Testosterone support,Mineral,Boron
 Digestive support,Enzyme,Bromelain
+Adenosine receptor blocking,Bioactive,Caffeine
 Bone mineralization,Mineral,Calcium
 Neuromuscular relaxation,Mineral,Calcium
 Estrogen modulation,Bioactive,Calcium-D-glucarate
+Digestive support,Enzyme,Cellulase
 Acetylcholine modulation,Bioactive,Choline
 Homocysteine reduction,Bioactive,Choline
 DNA repair / methylation,Bioactive,Choline
 Phase II detox,Bioactive,Choline
+Cartilage support,Bioactive,Chondroitin
 Glucose metabolism / insulin sensitivity,Mineral,Chromium
 Insulin sensitivity,Mineral,Chromium
 Glucose metabolism / insulin sensitivity,Bioactive,Cinnamon polyphenols
+Antioxidant activity,Bioactive,Citrus bioflavonoids
 Fatty acid oxidation,Fatty acid,CLA
 Gut barrier integrity,Bioactive,Collagen peptides
 Collagen / skin elasticity,Bioactive,Collagen peptides
@@ -94,27 +101,36 @@ DNA repair / methylation,Vitamin,Folate
 Phase II detox,Vitamin,Folate
 Anxiolytic pathways,Bioactive,GABA-related compounds
 Antimicrobial activity,Bioactive,Garlic (allicin)
+Digestive support,Enzyme,Glucoamylase
+Cartilage support,Bioactive,Glucosamine
 Sleep regulation,Amino acid,Glycine
 Antioxidant activity,Amino acid,Glycine
 Antioxidant defense systems,Amino acid,Glycine
 Collagen synthesis,Amino acid,Glycine
 Anxiolytic pathways,Amino acid,Glycine
 Phase II detox,Amino acid,Glycine
+Digestive support,Enzyme,Hemicellulase
 HPA axis modulation,Herb,Holy basil
 Cortisol regulation,Herb,Holy basil
 Adaptogenic response,Herb,Holy basil
 Insulin sensitivity,Bioactive,Inositol
+Digestive support,Enzyme,Invertase
 Thyroid support,Mineral,Iodine
 Mitochondrial support,Mineral,Iron
 Thyroid support,Mineral,Iron
 Dopamine modulation,Mineral,Iron
 Phase I detox,Mineral,Iron
 Hair support,Mineral,Iron
+Muscle protein synthesis,Amino acid,Isoleucine
 Nitric oxide production,Amino acid,L-arginine
 Mitochondrial support,Amino acid,L-carnitine
 ATP production,Amino acid,L-carnitine
 Fatty acid oxidation,Amino acid,L-carnitine
 Nitric oxide production,Amino acid,L-citrulline
+Muscle protein synthesis,Amino acid,L-lysine
+Collagen synthesis,Amino acid,L-lysine
+Antimicrobial activity,Amino acid,L-lysine
+Digestive support,Enzyme,Lactase
 Muscle protein synthesis,Amino acid,Leucine
 Gut barrier integrity,Amino acid,L-glutamine
 BDNF upregulation,Bioactive,Lion's Mane
@@ -122,6 +138,9 @@ Digestive support,Enzyme,Lipase
 GABA modulation,Amino acid,L-theanine
 Sleep regulation,Amino acid,L-theanine
 Anxiolytic pathways,Amino acid,L-theanine
+Macular pigment support,Bioactive,Lutein
+Antioxidant activity,Bioactive,Lutein
+Antioxidant activity,Bioactive,Lycopene
 Mitochondrial support,Mineral,Magnesium
 ATP production,Mineral,Magnesium
 Glucose metabolism / insulin sensitivity,Mineral,Magnesium
@@ -162,10 +181,14 @@ BDNF upregulation,Fatty acid,Omega-3 (DHA)
 Antimicrobial activity,Bioactive,Oregano oil
 HPA axis modulation,Herb,Panax ginseng
 Adaptogenic response,Herb,Panax ginseng
+Digestive support,Enzyme,Pancreatin
 Digestive support,Enzyme,Papain
+Digestive support,Enzyme,Pectinase
+Digestive support,Enzyme,Pepsin
 Acetylcholine modulation,Bioactive,Phosphatidylcholine
 Acetylcholine modulation,Bioactive,Phosphatidylserine
 Bone mineralization,Mineral,Phosphorus
+Digestive support,Enzyme,Phytase
 Lipid modulation,Bioactive,Plant sterols
 Antioxidant activity,Bioactive,Polyphenols
 Microbiome modulation,Bioactive,Polyphenols
@@ -188,6 +211,8 @@ Cortisol regulation,Herb,Rhodiola
 Adaptogenic response,Herb,Rhodiola
 Mitochondrial support,Bioactive,Ribose
 ATP production,Bioactive,Ribose
+Antioxidant activity,Bioactive,Rutin
+Capillary support,Bioactive,Rutin
 Thyroid support,Mineral,Selenium
 Immune modulation,Mineral,Selenium
 Antioxidant activity,Mineral,Selenium
@@ -204,6 +229,7 @@ GABA modulation,Amino acid,Taurine
 Serotonin modulation,Amino acid,Tryptophan
 Thyroid support,Amino acid,Tyrosine
 Dopamine modulation,Amino acid,Tyrosine
+Muscle protein synthesis,Amino acid,Valine
 Immune modulation,Vitamin,Vitamin A
 Neuroprotection,Vitamin,Vitamin C
 HPA axis modulation,Vitamin,Vitamin C
@@ -236,6 +262,9 @@ Bone mineralization,Vitamin,Vitamin K
 Bone mineralization,Vitamin,Vitamin K2
 Muscle protein synthesis,Macronutrient,Whey protein
 Carbohydrate absorption,Bioactive,White kidney bean extract
+Digestive support,Enzyme,Xylanase
+Macular pigment support,Bioactive,Zeaxanthin
+Antioxidant activity,Bioactive,Zeaxanthin
 Glucose metabolism / insulin sensitivity,Mineral,Zinc
 Thyroid support,Mineral,Zinc
 BDNF upregulation,Mineral,Zinc

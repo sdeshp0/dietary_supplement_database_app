@@ -29,8 +29,10 @@ MINERALS = {
     "Calcium", "Magnesium", "Zinc", "Iron", "Copper", "Manganese", "Chromium",
     "Selenium", "Potassium", "Iodine", "Boron", "Phosphorus", "Molybdenum",
 }
-# A mineral named as a salt ("Magnesium Citrate 500 mg") often gives the
-# weight of the whole salt, not the mineral, so it isn't compared
+# A mineral (or caffeine) named as a salt ("Magnesium Citrate 500 mg",
+# "Caffeine Citrate") often gives the weight of the whole salt, not the
+# nutrient, so it isn't compared
+SALT_WEIGHT = MINERALS | {"Caffeine"}
 SALT_NAME = re.compile(
     r"\b(citrate|oxide|glycinate|bisglycinate|malate|carbonate|gluconate|picolinate|"
     r"aspartate|chloride|sulfate|sulphate|chelate|orotate|taurate|lactate|hydroxide|"
@@ -44,6 +46,14 @@ SALT_NAME = re.compile(
 # unit mistake on the label (vitamin D entered as 1,000 mg instead of IU)
 IMPLAUSIBLE_TIMES_UL = 100
 IMPLAUSIBLE_TIMES_P99 = 5
+
+# Limits from other official sources, for compounds the ODS has no fact sheet
+# for. FDA: "For healthy adults, the FDA has cited 400 milligrams a day ... as
+# an amount not generally associated with dangerous, negative effects."
+# https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much
+OTHER_LIMITS = {
+    "Caffeine": (400, "FDA: up to 400 mg a day for most healthy adults"),
+}
 
 AMOUNT = re.compile(r"([\d,]*\.?\d+)\s*(?:[–-]\s*([\d,]*\.?\d+))?\s*(mcg|mg|g)\b")
 
@@ -123,6 +133,9 @@ def looks_like_unit_error(compound, dose):
 @lru_cache(maxsize=None)
 def adult_reference(compound):
     """The compound's adult RDA and UL ranges in its target unit, or None."""
+    if compound in OTHER_LIMITS:
+        limit, note = OTHER_LIMITS[compound]
+        return Reference(target_unit(compound), None, (limit, limit), note)
     if compound in NO_COMPARISON or compound not in _metadata().index:
         return None
     row = _metadata().loc[compound]
@@ -160,7 +173,7 @@ def compare_dose(compound, ingredient, amount, unit):
     reference = adult_reference(compound)
     if reference is None:
         return None
-    if compound in MINERALS and SALT_NAME.search(ingredient or ""):
+    if compound in SALT_WEIGHT and SALT_NAME.search(ingredient or ""):
         return Comparison("", "Not compared (salt weight)")
     dose = normalize_amount(amount, unit, compound, ingredient)
     if not isinstance(dose, Amount) or dose.unit != reference.unit:
@@ -213,7 +226,7 @@ def comparable_dose(compound, ingredient, amount, unit):
     """
     if not isinstance(compound, str):
         return None
-    if compound in MINERALS and SALT_NAME.search(ingredient or ""):
+    if compound in SALT_WEIGHT and SALT_NAME.search(ingredient or ""):
         return None
     dose = normalize_amount(amount, unit, compound, ingredient)
     if dose is None or dose.unit != target_unit(compound):

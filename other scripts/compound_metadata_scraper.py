@@ -295,6 +295,9 @@ NCCIH_STOPS = [
     r"keep in mind", r"for more information", r"key references", r"bottom line",
     r"safety$", r"is (it|\w+) safe", r"what are the side effects", r"tips to consider",
     r"what are the health benefits", r"other references", r"acknowledgments",
+    # Question headings on pages about several ingredients ("Are glucosamine
+    # and chondroitin helpful for ...?")
+    r"(is|are|do|does|can) [\w ,'-]+\?$",
 ]
 
 
@@ -302,16 +305,21 @@ def scrape_nccih(row):
     lines = page_lines(fetch_soup(row["source_url"]))
     record = empty_record(row["compound"], row["category"], "NCCIH", row["source_url"],
                           SOURCE_NAMES["NCCIH"])
+    # A page about several ingredients names them in its headings
+    # ("What are glucosamine and chondroitin?"); source_section gives that name
+    section = re.escape(row.get("source_section") or "")
+    about = [rf"what (is|are) {section}\?"] if section else []
+    safe = [rf"(is|are) {section} safe"] if section else []
     record.update(
         primary_functions=section_text(
             lines,
-            [r"background", r"bottom line", r"what is \w+", r"what are the health benefits"],
+            about + [r"background", r"bottom line", r"what is \w+", r"what are the health benefits"],
             NCCIH_STOPS,
         ),
         safety_overview=section_text(
             lines,
-            [r"what do we know about safety", r"safety$", r"is (it|\w+) safe",
-             r"what are the side effects"],
+            safe + [r"what do we know about safety", r"safety$", r"is (it|\w+) safe",
+                    r"what are the side effects"],
             NCCIH_STOPS,
         ),
         interactions_summary=section_text(lines, [r"keep in mind", r"tips to consider"], NCCIH_STOPS),

@@ -2,6 +2,8 @@ dsld_name,compound
 5-htp,5-HTP
 5-hydroxytryptophan,5-HTP
 l-5-hydroxytryptophan,5-HTP
+alpha galactosidase,Alpha-galactosidase
+alpha-galactosidase,Alpha-galactosidase
 alpha lipoic acid,Alpha-lipoic acid
 alpha-lipoic acid,Alpha-lipoic acid
 lipoic acid,Alpha-lipoic acid
@@ -13,6 +15,7 @@ amylase ii,Amylase
 amylase; bacterial,Amylase
 amylase; fungal,Amylase
 bacterial amylase,Amylase
+diastase,Amylase
 fungal amylase,Amylase
 ashwagandha,Ashwagandha
 ashwagandha (root) extract,Ashwagandha
@@ -88,6 +91,12 @@ berberine,Berberine
 berberine hcl,Berberine
 berberine hydrochloride,Berberine
 berberine sulfate,Berberine
+beta alanine,Beta-alanine
+beta-alanine,Beta-alanine
+beta-alanine hydrochloride,Beta-alanine
+carnosyn,Beta-alanine
+carnosyn beta-alanine,Beta-alanine
+beta-glucanase,Beta-glucanase
 beta 1;3 glucan,Beta-glucans
 beta glucan,Beta-glucans
 beta glucans,Beta-glucans
@@ -110,6 +119,15 @@ bromelain,Bromelain
 bromelain complex,Bromelain
 bromelain extract,Bromelain
 bromelain; powder,Bromelain
+caffeine,Caffeine
+caffeine anhydrous,Caffeine
+caffeine citrate,Caffeine
+caffeine; natural,Caffeine
+di-caffeine malate,Caffeine
+dicaffeine malate,Caffeine
+natural caffeine,Caffeine
+naturally occurring caffeine,Caffeine
+purcaf caffeine,Caffeine
 calcium,Calcium
 calcium aspartate,Calcium
 calcium bisglycinate chelate,Calcium
@@ -129,15 +147,36 @@ dicalcium phosphate,Calcium
 tricalcium phosphate,Calcium
 calcium d-glucarate,Calcium-D-glucarate
 calcium-d-glucarate,Calcium-D-glucarate
+cellulase,Cellulase
+cellulase ii,Cellulase
 choline,Choline
 choline bitartrate,Choline
 choline chloride,Choline
 choline citrate,Choline
+chondroitin,Chondroitin
+chondroitin sodium sulfate,Chondroitin
+chondroitin sulfate,Chondroitin
+chondroitin sulfate a,Chondroitin
+chondroitin sulfate sodium,Chondroitin
+chondroitin sulfate; sodium,Chondroitin
+marine chondroitin sulphate,Chondroitin
+sodium chondroitin sulfate,Chondroitin
 chromium,Chromium
 chromium amino acid chelate,Chromium
 chromium gtf,Chromium
 chromium picolinate,Chromium
 gtf chromium,Chromium
+bioflavonoid complex,Citrus bioflavonoids
+bioflavonoids,Citrus bioflavonoids
+citrus bioflavonoid,Citrus bioflavonoids
+citrus bioflavonoid complex,Citrus bioflavonoids
+citrus bioflavonoids,Citrus bioflavonoids
+citrus bioflavonoids complex,Citrus bioflavonoids
+hesperidin,Citrus bioflavonoids
+hesperidin complex,Citrus bioflavonoids
+lemon bioflavonoid,Citrus bioflavonoids
+lemon bioflavonoid complex,Citrus bioflavonoids
+lemon bioflavonoids,Citrus bioflavonoids
 cla,CLA
 cla complex,CLA
 conjugated linoleic acid,CLA
@@ -320,10 +359,20 @@ odorless garlic,Garlic (allicin)
 odorless garlic extract,Garlic (allicin)
 organic garlic,Garlic (allicin)
 organic garlic powder,Garlic (allicin)
+glucoamylase,Glucoamylase
+glucosamine,Glucosamine
+glucosamine hcl,Glucosamine
+glucosamine hydrochloride,Glucosamine
+glucosamine potassium sulfate complex,Glucosamine
+glucosamine sulfate,Glucosamine
+glucosamine sulfate 2kcl,Glucosamine
+glucosamine sulfate 2nacl,Glucosamine
+glucosamine sulfate potassium chloride,Glucosamine
 glycine,Glycine
 glycine; micronized,Glycine
 glycine; powder,Glycine
 l-glycine,Glycine
+hemicellulase,Hemicellulase
 holy basil,Holy basil
 holy basil (ocimum sanctum) (leaf) hydroethanolic extract,Holy basil
 holy basil (ocimum sanctum) leaf extract,Holy basil
@@ -342,6 +391,8 @@ tulsi,Holy basil
 inositol,Inositol
 inositol powder,Inositol
 inositol; powder,Inositol
+invertase,Invertase
+sucrase,Invertase
 iodide,Iodine
 iodine,Iodine
 potassium iodide,Iodine
@@ -353,6 +404,10 @@ ferrous sulfate,Iron
 iron,Iron
 iron complex,Iron
 iron; natural,Iron
+isoleucine,Isoleucine
+l-isoleucine,Isoleucine
+l-isoleucine; instantized,Isoleucine
+l-isoleucine; micronized,Isoleucine
 arginine,L-arginine
 arginine akg,L-arginine
 arginine alpha-ketoglutarate,L-arginine
@@ -395,11 +450,20 @@ l-glutamine hcl,L-glutamine
 l-glutamine hydrochloride,L-glutamine
 l-glutamine; micronized,L-glutamine
 l-glutamine; powder,L-glutamine
+l-lysine,L-lysine
+l-lysine hcl,L-lysine
+l-lysine hydrochloride,L-lysine
+l-lysine hydrochloride; micronized,L-lysine
+l-lysine; micronized,L-lysine
+lysine,L-lysine
+lysine hydrochloride,L-lysine
 l-theanine,L-theanine
 suntheanine,L-theanine
 suntheanine l-theanine,L-theanine
 theanine,L-theanine
 theapure l-theanine,L-theanine
+lactase,Lactase
+lactase; fungal,Lactase
 l-leucine,Leucine
 l-leucine; fermented,Leucine
 l-leucine; instantized,Leucine
@@ -424,6 +488,16 @@ lipase,Lipase
 lipase i,Lipase
 lipase ii,Lipase
 lipase; fungal,Lipase
+floraglo lutein,Lutein
+free lutein,Lutein
+lutein,Lutein
+lutein esters,Lutein
+lutemax 2020 lutein,Lutein
+lutigold lutein,Lutein
+trans-lutein,Lutein
+lycopene,Lycopene
+lycopene extract,Lycopene
+micronized lycopene,Lycopene
 dimagnesium phosphate,Magnesium
 elemental magnesium,Magnesium
 magnesium,Magnesium
@@ -485,6 +559,8 @@ nicotinamide,Niacin
 nicotinic acid,Niacin
 vitamin b-3,Niacin
 vitamin b3,Niacin
+alpha linolenic acid,Omega-3
+alpha-linolenic acid,Omega-3
 concentrated fish oil,Omega-3
 dha/epa,Omega-3
 dha; epa,Omega-3
@@ -504,6 +580,9 @@ omega-3 concentrate,Omega-3
 omega-3 dha,Omega-3
 omega-3 fatty acids,Omega-3
 omega-3 fish oil,Omega-3
+other omega-3 fatty acids,Omega-3
+other omega-3's,Omega-3
+other omega-3s,Omega-3
 purified fish oil,Omega-3
 total dha; epa,Omega-3
 total epa & dha,Omega-3
@@ -535,13 +614,19 @@ panax ginseng root extract,Panax ginseng
 panax ginseng root powder,Panax ginseng
 panax ginseng; powder,Panax ginseng
 standardized korean ginseng extract,Panax ginseng
+pancreatin,Pancreatin
+pancreatin 4x,Pancreatin
+pancreatin 8x,Pancreatin
 papain,Papain
 papain; powder,Papain
+pectinase,Pectinase
+pepsin,Pepsin
 phosphatidylcholine,Phosphatidylcholine
 phosphatidylcholine complex,Phosphatidylcholine
 phosphatidylserine,Phosphatidylserine
 phosphatidylserine complex,Phosphatidylserine
 phosphorus,Phosphorus
+phytase,Phytase
 phytosterol,Plant sterols
 phytosterol complex,Plant sterols
 phytosterol concentrate,Plant sterols
@@ -1087,6 +1172,10 @@ rhodiola; powder,Rhodiola
 bioenergy ribose,Ribose
 d-ribose,Ribose
 ribose,Ribose
+rutin,Rutin
+rutin concentrate,Rutin
+rutin powder,Rutin
+rutin; powder,Rutin
 l-selenomethionine,Selenium
 selenium,Selenium
 selenomethionine,Selenium
@@ -1105,6 +1194,11 @@ tryptophan,Tryptophan
 l-tyrosine,Tyrosine
 l-tyrosine; micronized,Tyrosine
 tyrosine,Tyrosine
+l-valine,Valine
+l-valine; instantized,Valine
+l-valine; micronized,Valine
+valine,Valine
+valine; instantized,Valine
 beta carotene,Vitamin A
 beta-carotene,Vitamin A
 beta-carotene; natural,Vitamin A
@@ -1171,6 +1265,11 @@ white kidney bean,White kidney bean extract
 white kidney bean (phaseolus vulgaris) extract,White kidney bean extract
 white kidney bean extract,White kidney bean extract
 white kidney bean seed extract,White kidney bean extract
+xylanase,Xylanase
+meso-zeaxanthin,Zeaxanthin
+trans-zeaxanthin,Zeaxanthin
+zeaxanthin,Zeaxanthin
+zeaxanthin isomers,Zeaxanthin
 zinc,Zinc
 zinc acetate dihydrate,Zinc
 zinc amino acid chelate,Zinc

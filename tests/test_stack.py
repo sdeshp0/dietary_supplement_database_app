@@ -85,7 +85,7 @@ class ProductDoses(unittest.TestCase):
         ]), ALIASES)
         # Turmeric (curcumin) has no adult reference amount, so it isn't listed
         self.assertEqual(doses["not_counted"].tolist(), [
-            "Salt weight, not the mineral", "Likely a unit error on the label",
+            "Weight of the whole salt", "Likely a unit error on the label",
             "No amount on the label",
         ])
 

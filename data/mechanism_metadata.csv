@@ -1,4 +1,5 @@
 mechanism,description,group,health_goals
+Adenosine receptor blocking,"Blocks adenosine receptors, which reduces drowsiness and increases alertness",Neurological,"energy, focus, performance"
 ATP production,Supports cellular ATP synthesis and mitochondrial energy output,Metabolic,"energy, fatigue, performance"
 Acetylcholine modulation,Influences acetylcholine synthesis or receptor activity,Neurological,"memory, focus"
 Adaptogenic response,Enhances resilience to physical and emotional stress,Endocrine,"stress, fatigue"
@@ -10,7 +11,9 @@ Anxiolytic pathways,Modulates neurotransmitters involved in anxiety reduction,Ne
 Autophagy activation,Promotes cellular cleanup and recycling processes,Cellular,"longevity, detox"
 BDNF upregulation,Increases brain-derived neurotrophic factor for neuroplasticity,Neurological,"cognitive, mood"
 Bone mineralization,Supports bone density and mineral deposition,Skeletal,bone health
+Capillary support,Helps protect capillaries and other small blood vessels,Cardiovascular,circulation
 Carbohydrate absorption,Modulates carbohydrate digestion and glucose uptake,Metabolic,"blood sugar, weight"
+Cartilage support,Supplies building blocks of joint cartilage,Musculoskeletal,joint health
 Collagen / skin elasticity,Supports skin elasticity and dermal structure,Dermatological,"skin health, aging"
 Collagen synthesis,"Promotes collagen formation in skin, joints",Structural,"skin health, joint health"
 Cortisol regulation,Helps normalize cortisol output under stress,Endocrine,"stress, resilience"
@@ -31,8 +34,10 @@ Homocysteine reduction,Reduces homocysteine via methylation pathways,Cardiovascu
 Immune modulation,Regulates innate and adaptive immune responses,Immune,immunity
 Insulin sensitivity,Improves insulin receptor signaling and glucose disposal,Metabolic,blood sugar
 Lipid modulation,"Improves lipid profiles (LDL, HDL)",Cardiovascular,heart health
+Macular pigment support,"Builds up the eye's macular pigment, which filters blue light",Ocular,eye health
 Microbiome modulation,Influences composition and activity of gut microbiota,GI,"gut health, immunity"
 Mitochondrial support,Enhances mitochondrial efficiency and biogenesis,Metabolic,"energy, fatigue"
+Muscle acid buffering,"Raises muscle carnosine, which buffers the acid built up during intense exercise",Musculoskeletal,"performance, endurance"
 Muscle protein synthesis,Stimulates muscle protein building pathways (mTOR),Musculoskeletal,"muscle growth, recovery"
 Neuromuscular relaxation,Supports muscle relaxation and nerve signaling,Neurological,"sleep, calm"
 Neuroprotection,Protects neurons from oxidative and excitotoxic damage,Neurological,"cognitive, aging"

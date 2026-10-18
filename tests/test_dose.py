@@ -37,6 +37,11 @@ class AdultReference(unittest.TestCase):
         self.assertEqual(adult_reference("Molybdenum").rda, (45, 45))
         self.assertEqual(adult_reference("Molybdenum").ul, (2000, 2000))
 
+    def test_caffeine_fda_limit(self):
+        caffeine = adult_reference("Caffeine")
+        self.assertIsNone(caffeine.rda)
+        self.assertEqual(caffeine.ul, (400, 400))
+
     def test_not_compared(self):
         self.assertIsNone(adult_reference("Omega-3"))
         self.assertIsNone(adult_reference("Ashwagandha"))
@@ -66,6 +71,11 @@ class CompareDose(unittest.TestCase):
         result = compare_dose("Vitamin A", "Beta-Carotene", "25000", "IU")
         self.assertEqual(result.percent_of_rda, "417–536%")
         self.assertEqual(result.upper_limit, "")
+
+    def test_caffeine(self):
+        self.assertEqual(compare_dose("Caffeine", "Caffeine Anhydrous", "500", "mg"),
+                         Comparison("", "Over the limit"))
+        self.assertIn("salt", compare_dose("Caffeine", "Caffeine Citrate", "200", "mg").upper_limit)
 
     def test_salt_names_not_compared(self):
         result = compare_dose("Magnesium", "Magnesium Citrate", "500", "mg")
