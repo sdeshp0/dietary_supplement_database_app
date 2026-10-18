@@ -100,12 +100,16 @@ ingredient in `data/compound_sources.csv`:
 | `NONE` | No official or credible monograph found | 16 |
 
 To refresh: `python "other scripts/compound_metadata_scraper.py"`. A compound
-that fails to fetch keeps its previous data.
+that fails to fetch keeps its previous data. Where an ODS fact sheet gives the
+adult upper limit in a sentence rather than a table (vitamin E), the scraper
+reads it from the sentence.
 
 `data/ingredient_aliases.csv` maps DSLD ingredient names (lowercased, single
 spaces) to ontology compounds, so a product's Supplement Facts can link each
 ingredient to its details. Edit it by hand; `python "other scripts/ingredient_mapping_report.py"`
-checks it and lists the most common names it doesn't cover yet.
+checks it and lists the most common names it doesn't cover yet. It gives
+coverage both for all rows and for ingredient rows only, leaving out the
+Nutrition Facts lines (calories, fat, sugar, protein) some labels repeat.
 
 `python "other scripts/suggest_ingredient_aliases.py"` finds variants of names
 already mapped (salts like "magnesium citrate", forms like "creatine hcl",
@@ -125,7 +129,8 @@ are cached for later runs.
 
 `utils/units.py` converts label amounts to the unit each compound's NIH ODS
 recommended amount uses (mg, mcg, g, mcg DFE for folate, mcg RAE for vitamin A),
-including the ODS IU conversions for vitamins A, D and E. Where the label doesn't
+including the ODS IU conversions for vitamins A, D and E and for beta-carotene,
+which counts toward vitamin A but not toward its upper limit. Where the label doesn't
 say which form it is (vitamin E in IU, vitamin A in IU, folate in mcg), the
 result carries a note naming the assumption. Tests: `python -m unittest discover tests`.
 

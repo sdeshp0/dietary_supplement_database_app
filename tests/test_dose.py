@@ -26,6 +26,17 @@ class AdultReference(unittest.TestCase):
         self.assertEqual(folate.unit, "mcg DFE")
         self.assertAlmostEqual(folate.ul[0], 1700)
 
+    def test_vitamin_e_upper_limit(self):
+        self.assertEqual(adult_reference("Vitamin E").ul, (1000, 1000))
+
+    def test_vitamin_k(self):
+        self.assertEqual(adult_reference("Vitamin K").rda, (90, 120))
+        self.assertIsNone(adult_reference("Vitamin K").ul)
+
+    def test_molybdenum(self):
+        self.assertEqual(adult_reference("Molybdenum").rda, (45, 45))
+        self.assertEqual(adult_reference("Molybdenum").ul, (2000, 2000))
+
     def test_not_compared(self):
         self.assertIsNone(adult_reference("Omega-3"))
         self.assertIsNone(adult_reference("Ashwagandha"))
@@ -49,6 +60,12 @@ class CompareDose(unittest.TestCase):
         result = compare_dose("Vitamin A", "Vitamin A", "25000", "IU")
         self.assertTrue(result.percent_of_rda.endswith("(estimate)"))
         self.assertEqual(result.upper_limit, "Over the limit (estimate)")
+
+    def test_beta_carotene_has_no_upper_limit(self):
+        # The vitamin A upper limit is for preformed vitamin A only
+        result = compare_dose("Vitamin A", "Beta-Carotene", "25000", "IU")
+        self.assertEqual(result.percent_of_rda, "417–536%")
+        self.assertEqual(result.upper_limit, "")
 
     def test_salt_names_not_compared(self):
         result = compare_dose("Magnesium", "Magnesium Citrate", "500", "mg")

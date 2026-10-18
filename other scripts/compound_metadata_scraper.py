@@ -203,17 +203,30 @@ def ods_heading_section(soup, keywords):
     return None
 
 
+def ods_prose_upper_limit(safety_text):
+    """
+    The adult upper limit when a fact sheet states it in a sentence instead
+    of a table, as vitamin E's does ("the upper limit for adults is 1,000 mg/day").
+    """
+    match = re.search(r"upper limit for adults is ([\d,.]+\s*(?:mcg|mg|g))\b",
+                      safety_text or "", flags=re.I)
+    if not match:
+        return None
+    return [{"Ages": "Adults 19 years and older", "Upper Limit": match.group(1)}]
+
+
 def scrape_ods(row):
     resource, soup = ods_content(row["source_url"])
     record = empty_record(row["compound"], row["category"], "ODS", row["source_url"],
                           f"ODS Fact Sheet API ({resource}, Consumer)")
+    safety = ods_heading_section(soup, ["harmful", "safety", "too much"])
     record.update(
         primary_functions=ods_heading_section(soup, ["what is", "what are", "what does"]),
         food_sources=ods_heading_section(soup, ["what foods", "food sources"]),
-        safety_overview=ods_heading_section(soup, ["harmful", "safety", "too much"]),
+        safety_overview=safety,
         interactions_summary=ods_heading_section(soup, ["interact"]),
         rda_json=to_json(extract_table(soup, ["recommended amount", "adequate intake"])),
-        ul_json=to_json(extract_table(soup, ["upper limit"])),
+        ul_json=to_json(extract_table(soup, ["upper limit"]) or ods_prose_upper_limit(safety)),
     )
     return record
 

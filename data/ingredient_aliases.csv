@@ -259,16 +259,41 @@ dietary fiber,Fiber
 fiber,Fiber
 fiber complex,Fiber
 fisetin,Fisetin
+(6s)-5-methyltetrahydrofolate,Folate
+(6s)-5-methyltetrahydrofolate acid; glucosamine salt,Folate
+(6s)-5-methyltetrahydrofolic acid,Folate
+(6s)-5-methyltetrahydrofolic acid glucosamine salt,Folate
+(6s)-5-methyltetrahydrofolic acid; glucosamine salt,Folate
+(6s)-n5-methyltetrahydrofolic acid calcium salt,Folate
+5-methyltetrahydrofolate,Folate
+5-methyltetrahydrofolate biofolate,Folate
 5-mthf,Folate
+6(s)-5-methyltetrahydrofolic acid,Folate
+6(s)-5-methyltetrahydrofolic acid; glucosamine salt,Folate
+[6s]-5-methyltetrahydrofolic acid,Folate
+[6s]-5-methyltetrahydrofolic acid; glucosamine salt,Folate
 calcium l-5-methylfolate,Folate
 folate,Folate
 folate complex,Folate
 folic acid,Folate
+l-5 methyltetrahydrofolate,Folate
+l-5 methyltetrahydrofolate calcium salt,Folate
 l-5-methylfolate,Folate
+l-5-methyltetrahydrofolate,Folate
 l-5-mthf,Folate
 l-methylfolate,Folate
 l-methylfolate calcium,Folate
+l-methyltetrahydrofolate,Folate
 methylfolate,Folate
+quatrefolic,Folate
+quatrefolic (6s)-5-methyltetrahydrofolate glucosamine salt,Folate
+quatrefolic (6s)-5-methyltetrahydrofolate; glucosamine salt,Folate
+quatrefolic (6s)-5-methyltetrahydrofolic acid,Folate
+quatrefolic (6s)-5-methyltetrahydrofolic acid glucosamine salt,Folate
+quatrefolic (6s)-5-methyltetrahydrofolic acid; glucosamine salt,Folate
+quatrefolic brand (6s)-5-methyl tetrahydrofolate glucosamine salt,Folate
+quatrefolic brand (6s)-5-methyltetrahydrofolate glucosamine salt,Folate
+quatrefolic(r),Folate
 gaba,GABA-related compounds
 gamma-aminobutyric acid,GABA-related compounds
 aged garlic bulb extract; powder,Garlic (allicin)
@@ -433,6 +458,7 @@ manganese chelate,Manganese
 manganese complex,Manganese
 manganese sulfate,Manganese
 melatonin,Melatonin
+molybdenum,Molybdenum
 methylsulfonylmethane,MSM
 methylsulfonylmethane; powder,MSM
 msm,MSM
@@ -453,6 +479,7 @@ nmn,NAD+ precursors
 inositol hexanicotinate,Niacin
 inositol nicotinate,Niacin
 niacin,Niacin
+niacin/niacinamide,Niacin
 niacinamide,Niacin
 nicotinamide,Niacin
 nicotinic acid,Niacin
@@ -1078,9 +1105,13 @@ tryptophan,Tryptophan
 l-tyrosine,Tyrosine
 l-tyrosine; micronized,Tyrosine
 tyrosine,Tyrosine
+beta carotene,Vitamin A
+beta-carotene,Vitamin A
+beta-carotene; natural,Vitamin A
 retinol,Vitamin A
 retinyl acetate,Vitamin A
 retinyl palmitate,Vitamin A
+trans beta carotene,Vitamin A
 vitamin a,Vitamin A
 vitamin a acetate,Vitamin A
 vitamin a palmitate,Vitamin A
@@ -1111,14 +1142,22 @@ vitamin e acetate,Vitamin E
 vitamin e natural,Vitamin E
 vitamin e succinate,Vitamin E
 vitamin e; natural,Vitamin E
+phylloquinone,Vitamin K
+phytonadione,Vitamin K
+vitamin k,Vitamin K
+vitamin k-1,Vitamin K
+vitamin k1,Vitamin K
+vitamin k1 (phylloquinone),Vitamin K
 menaquinone,Vitamin K2
 menaquinone-4,Vitamin K2
 menaquinone-7,Vitamin K2
 mk-7,Vitamin K2
 natural mk-7,Vitamin K2
+vitamin k-2,Vitamin K2
 vitamin k2,Vitamin K2
 vitamin k2 menaquinone-7,Vitamin K2
 vitamin k2 mk-7,Vitamin K2
+vitamin k2-7,Vitamin K2
 hydrolyzed whey protein,Whey protein
 hydrolyzed whey protein concentrate,Whey protein
 hydrolyzed whey protein isolate,Whey protein

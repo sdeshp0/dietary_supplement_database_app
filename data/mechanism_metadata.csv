@@ -3,16 +3,16 @@ ATP production,Supports cellular ATP synthesis and mitochondrial energy output,M
 Acetylcholine modulation,Influences acetylcholine synthesis or receptor activity,Neurological,"memory, focus"
 Adaptogenic response,Enhances resilience to physical and emotional stress,Endocrine,"stress, fatigue"
 Anti-inflammatory,Reduces inflammatory signaling and cytokine activity,Immune,"inflammation, pain, recovery"
-Antimicrobial activity,Inhibits growth of harmful bacteria,Fungi or other pathogens,"immunity, gut health"
+Antimicrobial activity,"Inhibits growth of harmful bacteria, fungi or other pathogens",Immune,"immunity, gut health"
 Antioxidant activity,Neutralizes free radicals and reduces oxidative stress,Metabolic,"inflammation, aging"
-Antioxidant defense systems,Upregulates endogenous antioxidant enzymes (SOD,Catalase,"detox, inflammation, aging"
+Antioxidant defense systems,"Upregulates endogenous antioxidant enzymes (SOD, catalase)",Cellular,"detox, inflammation, aging"
 Anxiolytic pathways,Modulates neurotransmitters involved in anxiety reduction,Neurological,"anxiety, calm"
 Autophagy activation,Promotes cellular cleanup and recycling processes,Cellular,"longevity, detox"
 BDNF upregulation,Increases brain-derived neurotrophic factor for neuroplasticity,Neurological,"cognitive, mood"
 Bone mineralization,Supports bone density and mineral deposition,Skeletal,bone health
 Carbohydrate absorption,Modulates carbohydrate digestion and glucose uptake,Metabolic,"blood sugar, weight"
 Collagen / skin elasticity,Supports skin elasticity and dermal structure,Dermatological,"skin health, aging"
-Collagen synthesis,Promotes collagen formation in skin,joints,"skin health, joint health"
+Collagen synthesis,"Promotes collagen formation in skin, joints",Structural,"skin health, joint health"
 Cortisol regulation,Helps normalize cortisol output under stress,Endocrine,"stress, resilience"
 Cytokine modulation,Regulates inflammatory cytokine signaling,Immune,"inflammation, immunity"
 DNA repair / methylation,Supports DNA repair and methylation pathways,Genomic,"aging, methylation"
@@ -30,7 +30,7 @@ Heavy metal chelation,Binds and removes heavy metals from tissues,Detoxification
 Homocysteine reduction,Reduces homocysteine via methylation pathways,Cardiovascular,heart health
 Immune modulation,Regulates innate and adaptive immune responses,Immune,immunity
 Insulin sensitivity,Improves insulin receptor signaling and glucose disposal,Metabolic,blood sugar
-Lipid modulation,Improves lipid profiles (LDL,HDL,heart health
+Lipid modulation,"Improves lipid profiles (LDL, HDL)",Cardiovascular,heart health
 Microbiome modulation,Influences composition and activity of gut microbiota,GI,"gut health, immunity"
 Mitochondrial support,Enhances mitochondrial efficiency and biogenesis,Metabolic,"energy, fatigue"
 Muscle protein synthesis,Stimulates muscle protein building pathways (mTOR),Musculoskeletal,"muscle growth, recovery"
@@ -40,8 +40,9 @@ Nitric oxide production,Increases NO synthesis for vasodilation and blood flow,C
 Phase I detox,Supports cytochrome P450 detoxification pathways,Detoxification,detox
 Phase II detox,Supports conjugation pathways for toxin elimination,Detoxification,detox
 Senolytic activity,Helps clear senescent (aging) cells,Cellular,longevity
-Serotonin modulation,Influences serotonin synthesis,receptor activity,"mood, sleep"
+Serotonin modulation,"Influences serotonin synthesis, receptor activity",Neurological,"mood, sleep"
 Skin antioxidant protection,Protects skin from oxidative and UV-induced damage,Dermatological,"skin health, aging"
+Sulfite breakdown,"Cofactor for enzymes that break down sulfites, purines and some drugs and toxins",Detoxification,detox
 Sleep regulation,Supports neurotransmitters and pathways involved in sleep,Neurological,sleep
 Testosterone support,Supports testosterone synthesis or signaling,Endocrine,"hormone balance, vitality"
 Thyroid support,Supports thyroid hormone production and conversion,Endocrine,"metabolism, energy"
