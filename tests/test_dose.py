@@ -33,6 +33,10 @@ class AdultReference(unittest.TestCase):
         self.assertEqual(adult_reference("Vitamin K").rda, (90, 120))
         self.assertIsNone(adult_reference("Vitamin K").ul)
 
+    def test_molybdenum(self):
+        self.assertEqual(adult_reference("Molybdenum").rda, (45, 45))
+        self.assertEqual(adult_reference("Molybdenum").ul, (2000, 2000))
+
     def test_not_compared(self):
         self.assertIsNone(adult_reference("Omega-3"))
         self.assertIsNone(adult_reference("Ashwagandha"))
