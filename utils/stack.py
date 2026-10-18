@@ -147,6 +147,48 @@ def product_doses(facts, aliases):
     return doses
 
 
+def other_ingredients(facts, aliases):
+    """
+    Label rows that link to a compound with no adult reference amount
+    (herbs, amino acids, probiotics...): they can't be added up, but the
+    stack page still lists them with a link to their details.
+    """
+    facts = choose_label_column(facts)
+    rows = []
+    columns = ["Ingredient", "Amount Per Serving", "Amount Per Serving Unit"]
+    for ingredient, amount, unit in facts[columns].itertuples(index=False, name=None):
+        compound = aliases.get(_normalize(ingredient))
+        if compound is None or adult_reference(STACK_GROUPS.get(compound, compound)) is not None:
+            continue
+        label = " ".join(str(v).strip() for v in (amount, unit) if isinstance(v, str))
+        rows.append({"compound": compound, "ingredient": ingredient, "label_amount": label})
+    return pd.DataFrame(rows, columns=["compound", "ingredient", "label_amount"])
+
+
+def stack_other_ingredients(products):
+    """
+    products: [(product name, other_ingredients frame)]. One row per
+    compound, with each product's label rows for it.
+    """
+    rows = [
+        {"Ingredient": r.compound, "product": product,
+         "label": f"{r.ingredient} {r.label_amount}".strip()}
+        for product, other in products
+        for r in other.itertuples(index=False)
+    ]
+    if not rows:
+        return pd.DataFrame(columns=["Ingredient", "From"])
+    rows = pd.DataFrame(rows)
+    by_product = rows.groupby(["Ingredient", "product"], sort=False)["label"].agg(", ".join)
+    sources = {}
+    for (compound, product), labels in by_product.items():
+        sources.setdefault(compound, []).append(f"{product}: {labels}")
+    return pd.DataFrame(
+        [(c, "; ".join(sources[c])) for c in sorted(sources, key=str.lower)],
+        columns=["Ingredient", "From"],
+    )
+
+
 def stack_totals(products):
     """
     products: [(product name, servings per day, product_doses frame)].
