@@ -5,6 +5,7 @@ import pandas as pd
 from streamlit_echarts import st_echarts
 
 from utils.dsld_helpers import dose_unit, products_with_compound
+from utils.stack_state import add_to_stack
 
 
 from utils.ingredient_helpers import (
@@ -330,10 +331,13 @@ else:
         columns.insert(3, "Market Status")
     if not (shown["% of adult RDA"].ne("").any() or shown["Upper limit"].ne("").any()):
         columns = [c for c in columns if c not in ("% of adult RDA", "Upper limit")]
-    st.dataframe(
+    selection = st.dataframe(
         shown[columns],
         hide_index=True,
         width="stretch",
+        key=f"products_{selected}_{on_market}_{sort_by}",
+        on_select="rerun",
+        selection_mode="multi-row",
         column_config={
             "Label": st.column_config.LinkColumn(
                 "Label", help="Opens the product in the Label Explorer", display_text="Open",
@@ -349,3 +353,12 @@ else:
             ),
         },
     )
+    chosen = shown["DSLD ID"].iloc[selection.selection.rows].tolist()
+    if st.button(
+        f"➕ Add {len(chosen)} selected to stack" if chosen
+        else "➕ Tick products in the table to add them to your stack",
+        disabled=not chosen,
+        help="Select products with the boxes at the left of the table, then add them "
+        "to the Supplement Stack Checker",
+    ):
+        add_to_stack(chosen)
